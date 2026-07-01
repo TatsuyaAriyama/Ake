@@ -1,0 +1,19 @@
+<!--
+  朱 Ake — iOS Info.plist に追記するキー。
+  `npx cap add ios` 後、App/App/Info.plist の <dict> 内へマージする。
+  文言本体は Base.lproj / ja.lproj の InfoPlist.strings でローカライズ済み
+  （ここではフォールバック用の英語を入れておく）。
+-->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Your location is used to compute the direction to your destination.</string>
+<key>NSMotionUsageDescription</key>
+<string>The heading sensor is used to orient the compass.</string>
+
+<!-- ローカライズを有効化（ja / en） -->
+<key>CFBundleLocalizations</key>
+<array>
+  <string>en</string>
+  <string>ja</string>
+</array>
+<key>CFBundleDevelopmentRegion</key>
+<string>en</string>

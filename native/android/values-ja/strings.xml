@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 朱 Ake — Android 文言（日本語）。res/values-ja/strings.xml へ配置。 -->
+<resources>
+    <string name="app_name">朱</string>
+    <string name="title_activity_main">朱</string>
+    <string name="location_rationale">目的地の方向を計算するために現在地を使用します。</string>
+</resources>

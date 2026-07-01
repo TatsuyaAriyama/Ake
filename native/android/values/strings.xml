@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 朱 Ake — Android 文言（英語 / 既定）。res/values/strings.xml へマージ。 -->
+<resources>
+    <string name="app_name">Ake</string>
+    <string name="title_activity_main">Ake</string>
+    <string name="package_name">com.tatsuyaariyama.ake</string>
+    <string name="custom_url_scheme">com.tatsuyaariyama.ake</string>
+    <string name="location_rationale">Your location is used to compute the direction to your destination.</string>
+</resources>

@@ -1,0 +1,16 @@
+<!--
+  朱 Ake — Android 権限。
+  `npx cap add android` 後、android/app/src/main/AndroidManifest.xml の
+  <manifest> 直下（<application> の外）へ追記する。
+  実行時権限フローは @capacitor/geolocation の requestPermissions が処理する。
+-->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+<!-- 方位センサー（コンパス）。ハード要件にはしない。 -->
+<uses-feature android:name="android.hardware.sensor.compass" android:required="false" />
+
+<!--
+  文言のローカライズは android/app/src/main/res/values/strings.xml（英語）と
+  values-ja/strings.xml（日本語）で行う（別ファイル参照）。
+-->

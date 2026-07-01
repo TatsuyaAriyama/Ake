@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.DS_Store
+
+# Capacitor native platforms (generated)
+ios/App/Pods
+android/.gradle
+android/app/build
+android/build
