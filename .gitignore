@@ -4,6 +4,7 @@ dist-ssr
 *.local
 .env
 .DS_Store
+*.tsbuildinfo
 
 # Capacitor native platforms (generated)
 ios/App/Pods
