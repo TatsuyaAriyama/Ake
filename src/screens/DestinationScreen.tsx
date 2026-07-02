@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { searchPlaces, hasGeocoder, type Place } from '../lib/geocoding';
 import { hasMap } from '../lib/mapStyle';
+import { loadStations, searchStations, type Station } from '../lib/stations';
 import {
   useDestination,
   sameSpot,
@@ -15,6 +16,11 @@ import { t } from '../lib/i18n';
 const MapPickerScreen = lazy(() =>
   import('./MapPickerScreen').then((m) => ({ default: m.MapPickerScreen }))
 );
+const StationDetailScreen = lazy(() =>
+  import('./StationDetailScreen').then((m) => ({
+    default: m.StationDetailScreen,
+  }))
+);
 
 interface Props {
   onDone: () => void;
@@ -23,8 +29,11 @@ interface Props {
 export function DestinationScreen({ onDone }: Props) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Place[]>([]);
+  const [stationHits, setStationHits] = useState<Station[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
+  const [station, setStation] = useState<Station | null>(null);
+  const stationsRef = useRef<Station[] | null>(null);
   const setDestination = useDestination((s) => s.setDestination);
   const history = useDestination((s) => s.history);
   const favorites = useDestination((s) => s.favorites);
@@ -35,6 +44,24 @@ export function DestinationScreen({ onDone }: Props) {
 
   const isFav = (d: Destination | Place) =>
     favorites.some((f) => sameSpot(f, d));
+
+  // 駅は同梱データからローカルで即時検索（オフライン・低遅延）。
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setStationHits([]);
+      return;
+    }
+    let alive = true;
+    (async () => {
+      const list = stationsRef.current ?? (stationsRef.current = await loadStations());
+      if (!alive) return;
+      setStationHits(searchStations(list, q, 6));
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [query]);
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -73,6 +100,18 @@ export function DestinationScreen({ onDone }: Props) {
     );
   }
 
+  if (station) {
+    return (
+      <Suspense fallback={<div className="sheet" />}>
+        <StationDetailScreen
+          station={station}
+          onDone={onDone}
+          onBack={() => setStation(null)}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="sheet">
       <div className="sheet__head">
@@ -101,22 +140,59 @@ export function DestinationScreen({ onDone }: Props) {
       {!hasGeocoder() && <div className="notice">{t('noGeocoder', lang)}</div>}
       {error && <div className="notice">{error}</div>}
 
-      {results.length > 0 ? (
-        <ul className="results">
-          {results.map((r) => (
-            <li key={r.id} className="result">
-              <button className="result__main" onClick={() => choose(r)}>
-                <span className="result__name">{r.name}</span>
-                {r.context && <span className="result__ctx">{r.context}</span>}
-              </button>
-              <StarButton
-                on={isFav(r)}
-                lang={lang}
-                onClick={() => toggleFavorite(r)}
-              />
-            </li>
-          ))}
-        </ul>
+      {stationHits.length > 0 || results.length > 0 ? (
+        <div className="results">
+          {stationHits.length > 0 && (
+            <>
+              <div className="section-label">{t('stations', lang)}</div>
+              <ul className="results__list">
+                {stationHits.map((s) => (
+                  <li key={`st-${s.lat},${s.lon}`} className="result">
+                    <button
+                      className="result__main"
+                      onClick={() => setStation(s)}
+                    >
+                      <span className="result__name">{s.name}</span>
+                      {(s.lines.length > 0 || s.operators.length > 0) && (
+                        <span className="result__ctx">
+                          {(s.lines.length > 0 ? s.lines : s.operators).join(
+                            ' · '
+                          )}
+                        </span>
+                      )}
+                    </button>
+                    <span className="result__chevron" aria-hidden>›</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {results.length > 0 && (
+            <>
+              {stationHits.length > 0 && (
+                <div className="section-label">{t('otherPlaces', lang)}</div>
+              )}
+              <ul className="results__list">
+                {results.map((r) => (
+                  <li key={r.id} className="result">
+                    <button className="result__main" onClick={() => choose(r)}>
+                      <span className="result__name">{r.name}</span>
+                      {r.context && (
+                        <span className="result__ctx">{r.context}</span>
+                      )}
+                    </button>
+                    <StarButton
+                      on={isFav(r)}
+                      lang={lang}
+                      onClick={() => toggleFavorite(r)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       ) : (
         <div className="results">
           {favorites.length > 0 && (

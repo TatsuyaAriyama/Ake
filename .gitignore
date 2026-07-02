@@ -11,3 +11,6 @@ ios/App/Pods
 android/.gradle
 android/app/build
 android/build
+
+# 一時作業（Overpass生データ等）
+.tmp/
