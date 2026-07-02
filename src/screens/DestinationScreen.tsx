@@ -3,13 +3,21 @@ import { searchPlaces, hasGeocoder, type Place } from '../lib/geocoding';
 import { hasMap } from '../lib/mapStyle';
 import { loadStations, searchStations, type Station } from '../lib/stations';
 import {
+  NEARBY_CATEGORIES,
+  searchNearby,
+  categoryLabel,
+  poiLabel,
+  type NearbyCategory,
+} from '../lib/nearby';
+import { distance, formatDistance, formatDistanceImperial } from '../lib/geo';
+import {
   useDestination,
   sameSpot,
   type Destination,
 } from '../store/destinationStore';
 import { useLocation } from '../store/locationStore';
 import { useSettings } from '../store/settingsStore';
-import { t } from '../lib/i18n';
+import { t, type Lang } from '../lib/i18n';
 
 // 地図（maplibre-gl）は目的地選択を開いたときだけ読み込む。
 // コンパス本体はオフライン動作のため初期バンドルに含めない。
@@ -33,17 +41,31 @@ export function DestinationScreen({ onDone }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
   const [station, setStation] = useState<Station | null>(null);
+  const [activeCat, setActiveCat] = useState<NearbyCategory | null>(null);
+  const [nearby, setNearby] = useState<Place[]>([]);
+  const [nearbyState, setNearbyState] = useState<'idle' | 'loading' | 'error'>(
+    'idle'
+  );
   const stationsRef = useRef<Station[] | null>(null);
   const setDestination = useDestination((s) => s.setDestination);
   const history = useDestination((s) => s.history);
   const favorites = useDestination((s) => s.favorites);
   const toggleFavorite = useDestination((s) => s.toggleFavorite);
   const fix = useLocation((s) => s.fix);
-  const lang = useSettings((s) => s.lang);
+  const { lang, units } = useSettings();
   const abortRef = useRef<AbortController | null>(null);
+  const nearbyAbortRef = useRef<AbortController | null>(null);
 
   const isFav = (d: Destination | Place) =>
     favorites.some((f) => sameSpot(f, d));
+
+  const fmtDist = (m: number) =>
+    units === 'km' ? formatDistance(m) : formatDistanceImperial(m);
+
+  const distOf = (p: Place) => {
+    const m = p.distanceM ?? (fix ? distance(fix, p) : null);
+    return m == null ? null : fmtDist(m);
+  };
 
   // 駅は同梱データからローカルで即時検索（オフライン・低遅延）。
   useEffect(() => {
@@ -87,6 +109,36 @@ export function DestinationScreen({ onDone }: Props) {
     };
   }, [query, fix]);
 
+  // カテゴリを選ぶと現在地まわりを Overpass で検索。
+  useEffect(() => {
+    if (!activeCat || !fix) return;
+    const ctrl = new AbortController();
+    nearbyAbortRef.current?.abort();
+    nearbyAbortRef.current = ctrl;
+    setNearbyState('loading');
+    setNearby([]);
+    (async () => {
+      try {
+        const r = await searchNearby(
+          activeCat,
+          fix,
+          categoryLabel(activeCat, lang),
+          ctrl.signal
+        );
+        setNearby(r);
+        setNearbyState('idle');
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') setNearbyState('error');
+      }
+    })();
+    return () => ctrl.abort();
+  }, [activeCat, fix, lang]);
+
+  const pickCategory = (cat: NearbyCategory) => {
+    setQuery('');
+    setActiveCat((cur) => (cur?.id === cat.id ? null : cat));
+  };
+
   const choose = (d: Destination | Place) => {
     setDestination(d);
     onDone();
@@ -125,7 +177,10 @@ export function DestinationScreen({ onDone }: Props) {
         className="search-input"
         placeholder={t('searchPlaceholder', lang)}
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          if (e.target.value.trim()) setActiveCat(null);
+        }}
         autoFocus
         enterKeyHint="search"
       />
@@ -137,10 +192,59 @@ export function DestinationScreen({ onDone }: Props) {
         </button>
       )}
 
-      {!hasGeocoder() && <div className="notice">{t('noGeocoder', lang)}</div>}
+      {fix && (
+        <div className="cats">
+          {NEARBY_CATEGORIES.map((c) => (
+            <button
+              key={c.id}
+              className="cat-chip"
+              data-active={activeCat?.id === c.id}
+              onClick={() => pickCategory(c)}
+            >
+              {categoryLabel(c, lang)}
+            </button>
+          ))}
+        </div>
+      )}
+
       {error && <div className="notice">{error}</div>}
 
-      {stationHits.length > 0 || results.length > 0 ? (
+      {activeCat ? (
+        <div className="results">
+          <div className="section-label">
+            {lang === 'en'
+              ? `${t('nearbyOf', lang)} ${categoryLabel(activeCat, lang)}`
+              : `${t('nearbyOf', lang)}${categoryLabel(activeCat, lang)}`}
+          </div>
+          {nearbyState === 'loading' && (
+            <div className="hint hint--pad">{t('searching', lang)}</div>
+          )}
+          {nearbyState === 'error' && (
+            <div className="notice">{t('nearbyFailed', lang)}</div>
+          )}
+          {nearbyState === 'idle' && nearby.length === 0 && (
+            <div className="hint hint--pad">{t('noResults', lang)}</div>
+          )}
+          {nearby.length > 0 && (
+            <>
+              <ul className="results__list">
+                {nearby.map((r) => (
+                  <PlaceRow
+                    key={r.id}
+                    place={r}
+                    lang={lang}
+                    fav={isFav(r)}
+                    dist={distOf(r)}
+                    onChoose={() => choose(r)}
+                    onToggleFav={() => toggleFavorite(r)}
+                  />
+                ))}
+              </ul>
+              <div className="source-note">{t('poiSourceOsm', lang)}</div>
+            </>
+          )}
+        </div>
+      ) : stationHits.length > 0 || results.length > 0 ? (
         <div className="results">
           {stationHits.length > 0 && (
             <>
@@ -175,19 +279,15 @@ export function DestinationScreen({ onDone }: Props) {
               )}
               <ul className="results__list">
                 {results.map((r) => (
-                  <li key={r.id} className="result">
-                    <button className="result__main" onClick={() => choose(r)}>
-                      <span className="result__name">{r.name}</span>
-                      {r.context && (
-                        <span className="result__ctx">{r.context}</span>
-                      )}
-                    </button>
-                    <StarButton
-                      on={isFav(r)}
-                      lang={lang}
-                      onClick={() => toggleFavorite(r)}
-                    />
-                  </li>
+                  <PlaceRow
+                    key={r.id}
+                    place={r}
+                    lang={lang}
+                    fav={isFav(r)}
+                    dist={distOf(r)}
+                    onChoose={() => choose(r)}
+                    onToggleFav={() => toggleFavorite(r)}
+                  />
                 ))}
               </ul>
             </>
@@ -244,13 +344,47 @@ export function DestinationScreen({ onDone }: Props) {
   );
 }
 
+function PlaceRow({
+  place,
+  lang,
+  fav,
+  dist,
+  onChoose,
+  onToggleFav,
+}: {
+  place: Place;
+  lang: Lang;
+  fav: boolean;
+  dist: { value: string; unit: string } | null;
+  onChoose: () => void;
+  onToggleFav: () => void;
+}) {
+  const badge = poiLabel(place.category, lang);
+  const ctx = [badge, place.context].filter(Boolean).join(' · ');
+  return (
+    <li className="result">
+      <button className="result__main" onClick={onChoose}>
+        <span className="result__name">{place.name}</span>
+        {ctx && <span className="result__ctx">{ctx}</span>}
+      </button>
+      {dist && (
+        <span className="result__dist">
+          {dist.value}
+          <span className="result__dist-unit">{dist.unit}</span>
+        </span>
+      )}
+      <StarButton on={fav} lang={lang} onClick={onToggleFav} />
+    </li>
+  );
+}
+
 function StarButton({
   on,
   lang,
   onClick,
 }: {
   on: boolean;
-  lang: 'ja' | 'en';
+  lang: Lang;
   onClick: () => void;
 }) {
   return (

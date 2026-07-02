@@ -51,6 +51,12 @@ const strings = {
     stationPhotoUnavailable: '写真は準備中です',
     stationLinesUnknown: '路線情報は準備中です',
     dataSourceOsm: '駅データ: © OpenStreetMap contributors',
+    nearbyLabel: '近くを探す',
+    nearbyOf: '近くの',
+    searching: '探しています…',
+    noResults: '見つかりませんでした',
+    nearbyFailed: '検索できませんでした。少し待って再試行してください。',
+    poiSourceOsm: '検索: © OpenStreetMap contributors',
   },
   en: {
     setDestination: 'Choose a destination',
@@ -99,6 +105,12 @@ const strings = {
     stationPhotoUnavailable: 'Photo coming soon',
     stationLinesUnknown: 'Line info coming soon',
     dataSourceOsm: 'Station data: © OpenStreetMap contributors',
+    nearbyLabel: 'Explore nearby',
+    nearbyOf: 'Nearby',
+    searching: 'Searching…',
+    noResults: 'No results found',
+    nearbyFailed: 'Search failed. Please wait a moment and try again.',
+    poiSourceOsm: 'Search: © OpenStreetMap contributors',
   },
 } as const;
 
