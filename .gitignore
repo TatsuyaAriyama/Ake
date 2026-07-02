@@ -14,3 +14,7 @@ android/build
 
 # 一時作業（Overpass生データ等）
 .tmp/
+
+# capacitor-assets の PWA 生成物（未使用）
+icons/
+public/manifest.webmanifest

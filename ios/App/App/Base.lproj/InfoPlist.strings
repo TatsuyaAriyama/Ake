@@ -1,0 +1,5 @@
+/* Ake — iOS permission strings (English / Base) */
+/* After `npx cap add ios`, copy into App/App/Base.lproj/ and add to Xcode Localizations */
+
+"NSLocationWhenInUseUsageDescription" = "Your location is used to compute the direction to your destination.";
+"NSMotionUsageDescription" = "The heading sensor is used to orient the compass.";

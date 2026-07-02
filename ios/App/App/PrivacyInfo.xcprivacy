@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  朱 Ake — Apple プライバシーマニフェスト。
+  `npx cap add ios` 後、App/App/ 直下へ追加し、Xcode の
+  「Copy Bundle Resources」に含める（ターゲットに追加すれば自動で入る）。
+
+  宣言内容:
+    - NSPrivacyTracking = false … トラッキングは一切しない。
+    - NSPrivacyTrackingDomains = 空 … トラッキング用ドメインなし。
+    - NSPrivacyCollectedDataTypes = 空 … サーバーへ個人データを送らない。
+        位置情報は端末上で方位計算にのみ使い、収集・送信・保存しない。
+    - NSPrivacyAccessedAPITypes … 必要理由 API の申告。
+        UserDefaults(CA92.1): @capacitor/preferences が設定の保存に使用。
+-->
+<plist version="1.0">
+<dict>
+  <key>NSPrivacyTracking</key>
+  <false/>
+  <key>NSPrivacyTrackingDomains</key>
+  <array/>
+  <key>NSPrivacyCollectedDataTypes</key>
+  <array/>
+  <key>NSPrivacyAccessedAPITypes</key>
+  <array>
+    <dict>
+      <key>NSPrivacyAccessedAPIType</key>
+      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+      <key>NSPrivacyAccessedAPITypeReasons</key>
+      <array>
+        <string>CA92.1</string>
+      </array>
+    </dict>
+  </array>
+</dict>
+</plist>
