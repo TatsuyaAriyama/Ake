@@ -32,7 +32,11 @@ export function OnboardingScreen({ onGranted }: Props) {
 
   return (
     <div className="onboard">
-      <img className="onboard__icon" src="/icon.svg" alt="朱 Ake" />
+      <img
+        className="onboard__icon"
+        src={`${import.meta.env.BASE_URL}icon.svg`}
+        alt="朱 Ake"
+      />
       <div className="onboard__title">{t('onboardTitle', lang)}</div>
       <p className="onboard__body">{t('onboardBody', lang)}</p>
       <button className="btn-primary" onClick={start} disabled={busy}>
