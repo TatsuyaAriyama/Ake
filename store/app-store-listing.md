@@ -137,7 +137,7 @@ Captured in English on an iPhone 17 Pro Max simulator (same 6.9" canvas):
 2. `02-home.png` — Home: compass + "Choose a destination" + Tokyo map
 3. `03-search.png` — Destination search ("Tokyo Tower") with live results
 4. `04-nearby.png` — Nearby Food category (distance-sorted list)
-5. `05-compass.png` — Compass pointing to a destination (53 m)
+5. `05-compass.png` — Compass pointing to a destination (109 m)
 6. `06-arrived.png` — Arrival mark ("Arrived")
 
 Upload directly to App Store Connect. Order 1→6 tells the full story; pick any
