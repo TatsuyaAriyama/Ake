@@ -87,17 +87,25 @@ button {
 }
 
 /* ---- MiniMap（脇役） ---- */
+.minimap-shell {
+  position: relative;
+  flex: 0 0 auto;
+}
 .minimap {
   position: relative;
   width: 100%;
   height: clamp(190px, 32vh, 320px);
-  flex: 0 0 auto;
   border-top: 1.5px solid #ece7df;
   border-radius: 22px 22px 0 0;
   overflow: hidden;
   background: var(--surface);
 }
 .minimap--empty {
+  flex: 0 0 auto;
+  width: 100%;
+  height: clamp(190px, 32vh, 320px);
+  border-top: 1.5px solid #ece7df;
+  border-radius: 22px 22px 0 0;
   background: repeating-linear-gradient(
     45deg,
     #f4efe7,
@@ -109,6 +117,34 @@ button {
 .minimap .maplibregl-ctrl-attrib {
   font-size: 9px;
   opacity: 0.5;
+}
+/* 自動追従が止まっている間だけ現れる「現在地に戻す」ボタン */
+.map-recenter {
+  position: absolute;
+  right: 12px;
+  bottom: calc(var(--safe-bottom) + 12px);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(252, 251, 248, 0.94);
+  color: var(--accent);
+  box-shadow: 0 2px 6px rgba(24, 19, 17, 0.22);
+  animation: recenter-in 160ms ease;
+}
+.map-recenter:active {
+  transform: scale(0.94);
+}
+@keyframes recenter-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* 現在地マーカー: ドット + ヘディングのウェッジ */
@@ -318,6 +354,34 @@ button {
 }
 .map-confirm:disabled {
   opacity: 0.6;
+}
+/* 拡大/縮小 — ピンチでも動くが、気づけるように常時見せておく */
+.map-zoom {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(24, 19, 17, 0.18);
+}
+.map-zoom__btn {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: rgba(252, 251, 248, 0.94);
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+.map-zoom__btn:active {
+  background: var(--surface);
+}
+.map-zoom__btn + .map-zoom__btn {
+  border-top: 1px solid #ece7df;
 }
 /* MapLibre のロゴ/アトリビューションを控えめに */
 .map-wrap .maplibregl-ctrl-attrib {

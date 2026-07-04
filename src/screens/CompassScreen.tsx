@@ -176,7 +176,7 @@ export function CompassScreen({ onChooseDestination, onOpenSettings }: Props) {
         </>
       )}
       </div>
-      <MiniMap me={fix} destination={dest} heading={headingTrue} />
+      <MiniMap me={fix} destination={dest} heading={headingTrue} lang={lang} />
     </div>
   );
 }

@@ -37,10 +37,13 @@ export function MapPickerScreen({ onDone, onBack }: Props) {
       style: buildMapStyle(),
       center: [start.lon, start.lat],
       zoom: 14,
+      minZoom: 4,
+      maxZoom: 19,
       attributionControl: { compact: true },
       dragRotate: false,
       pitchWithRotate: false,
     });
+    // 回転だけ止める。ピンチ/スクロール/ダブルタップのズームは自由に残す。
     map.touchZoomRotate.disableRotation();
     map.on('move', () => {
       const c = map.getCenter();
@@ -70,6 +73,12 @@ export function MapPickerScreen({ onDone, onBack }: Props) {
     onDone();
   };
 
+  const zoomBy = (delta: number) => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.zoomTo(map.getZoom() + delta, { duration: 150 });
+  };
+
   return (
     <div className="sheet sheet--map">
       <div className="sheet__head">
@@ -85,6 +94,22 @@ export function MapPickerScreen({ onDone, onBack }: Props) {
           <MapPin />
         </div>
         <div className="map-hint">{t('dragToAim', lang)}</div>
+        <div className="map-zoom">
+          <button
+            className="map-zoom__btn"
+            onClick={() => zoomBy(1)}
+            aria-label={t('zoomIn', lang)}
+          >
+            +
+          </button>
+          <button
+            className="map-zoom__btn"
+            onClick={() => zoomBy(-1)}
+            aria-label={t('zoomOut', lang)}
+          >
+            −
+          </button>
+        </div>
       </div>
 
       <button className="btn-primary map-confirm" onClick={confirm} disabled={busy}>
