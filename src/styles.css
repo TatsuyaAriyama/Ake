@@ -75,6 +75,19 @@ button {
   will-change: transform;
 }
 
+/* グランス表示: 針＋距離だけ。コンパスは少し小さく、距離は控えめに。
+   駅名・ヒント・ミニマップは非表示（JSX 側で描画しない）。 */
+.compass-screen.glance .compass {
+  width: min(52vw, 34vh, 260px);
+  height: min(52vw, 34vh, 260px);
+}
+.compass-screen.glance .distance__value {
+  font-size: clamp(40px, 11vw, 64px);
+}
+.compass-screen.glance .distance__unit {
+  font-size: clamp(16px, 4.4vw, 22px);
+}
+
 /* 目的地への近さで速さが変わる"鼓動"。近づくほど周期が短くなる。 */
 @keyframes compass-breathe {
   0%,

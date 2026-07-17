@@ -10,12 +10,16 @@ interface SettingsState {
   northRef: NorthRef;
   haptics: boolean;
   lang: Lang;
+  /** グランス表示（針＋距離だけの最小表示）。 */
+  glance: boolean;
   hydrated: boolean;
   hydrate: () => Promise<void>;
   setUnits: (u: Units) => void;
   setNorthRef: (n: NorthRef) => void;
   setHaptics: (h: boolean) => void;
   setLang: (l: Lang) => void;
+  setGlance: (g: boolean) => void;
+  toggleGlance: () => void;
 }
 
 interface Persisted {
@@ -23,6 +27,7 @@ interface Persisted {
   northRef: NorthRef;
   haptics: boolean;
   lang: Lang;
+  glance: boolean;
 }
 
 function persist(s: SettingsState) {
@@ -31,6 +36,7 @@ function persist(s: SettingsState) {
     northRef: s.northRef,
     haptics: s.haptics,
     lang: s.lang,
+    glance: s.glance,
   };
   void saveJSON(KEYS.settings, data);
 }
@@ -40,6 +46,7 @@ export const useSettings = create<SettingsState>((set, get) => ({
   northRef: 'true',
   haptics: true,
   lang: detectLang(),
+  glance: false,
   hydrated: false,
 
   async hydrate() {
@@ -65,6 +72,14 @@ export const useSettings = create<SettingsState>((set, get) => ({
   },
   setLang(lang) {
     set({ lang });
+    persist(get());
+  },
+  setGlance(glance) {
+    set({ glance });
+    persist(get());
+  },
+  toggleGlance() {
+    set({ glance: !get().glance });
     persist(get());
   },
 }));

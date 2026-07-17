@@ -7,6 +7,7 @@ import { useLocation } from './store/locationStore';
 import { useHeading } from './store/headingStore';
 import { useDestination } from './store/destinationStore';
 import { useSettings } from './store/settingsStore';
+import { useWidgetSync } from './lib/useWidgetSync';
 import { KEYS, loadJSON, saveJSON } from './lib/storage';
 
 type Screen = 'compass' | 'destination' | 'settings';
@@ -25,6 +26,9 @@ export function App() {
   const stopHeading = useHeading((s) => s.stop);
   const updateDeclination = useHeading((s) => s.updateDeclination);
   const fix = useLocation((s) => s.fix);
+
+  // 目的地・現在地・設定の変化をホーム/ロック画面ウィジェットへ同期（Webでは no-op）
+  useWidgetSync();
 
   // 初期ハイドレーション
   useEffect(() => {

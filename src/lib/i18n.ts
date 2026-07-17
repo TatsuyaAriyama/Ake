@@ -66,6 +66,8 @@ const strings = {
     noResults: '見つかりませんでした',
     nearbyFailed: '検索できませんでした。少し待って再試行してください。',
     poiSourceOsm: '検索: © OpenStreetMap contributors',
+    glanceEnter: 'コンパクト表示にする',
+    glanceExit: '通常表示に戻す',
   },
   en: {
     setDestination: 'Choose a destination',
@@ -129,6 +131,8 @@ const strings = {
     noResults: 'No results found',
     nearbyFailed: 'Search failed. Please wait a moment and try again.',
     poiSourceOsm: 'Search: © OpenStreetMap contributors',
+    glanceEnter: 'Compact view',
+    glanceExit: 'Full view',
   },
 } as const;
 

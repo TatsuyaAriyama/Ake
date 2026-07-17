@@ -125,6 +125,30 @@ npm i -D @capacitor/assets
 npx capacitor-assets generate --iconBackgroundColor '#FCFBF8' --splashBackgroundColor '#FCFBF8'
 ```
 
+## グランス表示（コンパクトモード）
+
+コンパス画面上部中央の「◲」トグルで、**針と距離だけ**の最小表示に切り替わる。
+駅名・案内ことば・ミニマップを畳んで、コンパスを少し小さく中央に据える
+（ミニマップ描画も止めるので省電力）。針はアプリ内なので**リアルタイムに追従**する。
+状態は設定に永続化され、次回起動時も同じ表示で開く。
+
+- 実装: `settingsStore.glance` ／ `CompassScreen`（`glance` クラスと条件描画）／ `styles.css`
+
+## ホーム / ロック画面ウィジェット（iOS）
+
+目的地の**方角**（北を上に固定した矢印＋「北東」等）と**直線距離**をウィジェットに表示。
+端末の向きは使えないため、**最後に取得した現在地**を基準にした方角・距離を、
+アプリ起動中は変化のたびに、バックグラウンドでは WidgetKit のタイムラインで更新する
+（リアルタイムのコンパスはアプリ本体でのみ動作）。
+
+- Web 側の橋渡し: `src/lib/widgetBridge.ts` ＋ `src/lib/useWidgetSync.ts`
+  （目的地/現在地/設定の変化を App Group へ書き込む。Web では no-op）
+- ネイティブ: `ios/App/App/SuzakuWidgetPlugin.swift`（Capacitor プラグイン）／
+  `ios/App/SuzakuWidget/`（WidgetKit 拡張。systemSmall / systemMedium /
+  accessory{Circular,Rectangular,Inline}）
+- **Xcode でのターゲット追加・App Group 有効化が必要** → 手順は
+  [`docs/WIDGET_SETUP.md`](docs/WIDGET_SETUP.md)
+
 ## 受け入れ基準の対応状況
 
 - [x] bearing/distance を数値検証（東京駅→渋谷ほか、真北・偏角込み）

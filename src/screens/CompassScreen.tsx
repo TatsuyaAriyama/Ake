@@ -36,7 +36,7 @@ export function CompassScreen({ onChooseDestination, onOpenSettings }: Props) {
   const declination = useHeading((s) => s.declination);
   const locError = useLocation((s) => s.error);
   const fix = useLocation((s) => s.fix);
-  const { units, haptics, lang, northRef } = useSettings();
+  const { units, haptics, lang, northRef, glance, toggleGlance } = useSettings();
 
   const wasAligned = useRef(false);
   const wasArrived = useRef(false);
@@ -116,10 +116,18 @@ export function CompassScreen({ onChooseDestination, onOpenSettings }: Props) {
       : 0;
 
   return (
-    <div className="compass-screen">
+    <div className={glance ? 'compass-screen glance' : 'compass-screen'}>
       <div className="topbar">
         <button className="icon-btn" onClick={onOpenSettings} aria-label={t('settings', lang)}>
           <GearIcon />
+        </button>
+        <button
+          className="icon-btn"
+          onClick={toggleGlance}
+          aria-label={t(glance ? 'glanceExit' : 'glanceEnter', lang)}
+          aria-pressed={glance}
+        >
+          {glance ? <ExpandIcon /> : <ContractIcon />}
         </button>
         <button
           className="icon-btn"
@@ -159,24 +167,28 @@ export function CompassScreen({ onChooseDestination, onOpenSettings }: Props) {
               <span className="distance__unit">{dist.unit}</span>
             </div>
           )}
-          {dest && <div className="dest-name">{dest.name}</div>}
-          <div className="hint">
-            {locError
-              ? t('permissionDenied', lang)
-              : !fix
-                ? t('locating', lang)
-                : nav.isAligned
-                  ? <span className="aligned-note">{t('aligned', lang)}</span>
-                  : lowAccuracy
-                    ? t('calibrate', lang)
-                    : nav.offsetDeg != null
-                      ? t(turnCueKey(nav.offsetDeg), lang)
-                      : t('holdFlat', lang)}
-          </div>
+          {!glance && dest && <div className="dest-name">{dest.name}</div>}
+          {!glance && (
+            <div className="hint">
+              {locError
+                ? t('permissionDenied', lang)
+                : !fix
+                  ? t('locating', lang)
+                  : nav.isAligned
+                    ? <span className="aligned-note">{t('aligned', lang)}</span>
+                    : lowAccuracy
+                      ? t('calibrate', lang)
+                      : nav.offsetDeg != null
+                        ? t(turnCueKey(nav.offsetDeg), lang)
+                        : t('holdFlat', lang)}
+            </div>
+          )}
         </>
       )}
       </div>
-      <MiniMap me={fix} destination={dest} heading={headingTrue} lang={lang} />
+      {!glance && (
+        <MiniMap me={fix} destination={dest} heading={headingTrue} lang={lang} />
+      )}
     </div>
   );
 }
@@ -195,6 +207,24 @@ function PinIcon() {
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
       <path d="M12 21c4-5 7-8.5 7-12a7 7 0 0 0-14 0c0 3.5 3 7 7 12z" strokeLinejoin="round" />
       <circle cx="12" cy="9" r="2.5" />
+    </svg>
+  );
+}
+
+// グランス表示に入る（四隅を内へ）。
+function ContractIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 4v3.5a1.5 1.5 0 0 1-1.5 1.5H4M20 8h-3.5A1.5 1.5 0 0 1 15 6.5V3M15 20.5V17a1.5 1.5 0 0 1 1.5-1.5H20M4 15.5h3.5A1.5 1.5 0 0 1 9 17v3.5" />
+    </svg>
+  );
+}
+
+// 通常表示に戻る（四隅を外へ）。
+function ExpandIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 8.5V5a1 1 0 0 1 1-1h3.5M20 8.5V5a1 1 0 0 0-1-1h-3.5M20 15.5V19a1 1 0 0 1-1 1h-3.5M4 15.5V19a1 1 0 0 0 1 1h3.5" />
     </svg>
   );
 }
