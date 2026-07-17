@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		06C2EAA8205C899699658FAD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0356B04CF2CA0A7812D0F28C /* InfoPlist.strings */; };
+		07BE93211CB89360DB76762D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CC4A5288B5C0DA1AEA5A7FC /* Foundation.framework */; };
+		120EC6D20D3AFF3AC0CAD28E /* SuzakuWidgetPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = AD3EEE2CC09DCA15153DAABC /* SuzakuWidgetPlugin.m */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		4CA61DF2D5E360F82B2FBCDC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4C2D6FF422E95297648C1093 /* PrivacyInfo.xcprivacy */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
@@ -16,11 +18,44 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		54E225B8BD4A3E8EC4D6A0A5 /* SuzakuWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8ADE306D52AD4B135625A87 /* SuzakuWidgetBundle.swift */; };
+		856B788A7084B2A73D1460C4 /* SuzakuWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7AAD86259729CDC26F2D85C5 /* SuzakuWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		90BA7AC7891DFECE33BE18AB /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226AC3A914EBDF145443DDB4 /* WidgetSnapshot.swift */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
+		B339E44F821B4296D7C9657D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 690533DF45F358037337A6C9 /* PrivacyInfo.xcprivacy */; };
+		CFD30664E6A062312FC17C69 /* SuzakuWidgetPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF441076192A7C9868149F8C /* SuzakuWidgetPlugin.swift */; };
+		DA1F38E20CA2E97C4C21A45D /* SuzakuWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D91DEAC44CF3A6E77AACBE1 /* SuzakuWidget.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		440D6BE2CCE6EB0C15285860 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE63D41CA54EF9B9057172BC;
+			remoteInfo = SuzakuWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		AE0636F8653584EA838DEC19 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				856B788A7084B2A73D1460C4 /* SuzakuWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		226AC3A914EBDF145443DDB4 /* WidgetSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetSnapshot.swift; sourceTree = "<group>"; };
+		2D0EAE7E956CC2180DA08230 /* SuzakuWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = SuzakuWidget.entitlements; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		3BEB944CF7B426485CBCC075 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4C2D6FF422E95297648C1093 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -31,9 +66,17 @@
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		5179424C605E977440B9F65B /* ja */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5D91DEAC44CF3A6E77AACBE1 /* SuzakuWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SuzakuWidget.swift; sourceTree = "<group>"; };
+		690533DF45F358037337A6C9 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		7AAD86259729CDC26F2D85C5 /* SuzakuWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SuzakuWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7CC4A5288B5C0DA1AEA5A7FC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		A01522D736985C0F6F33CE51 /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; name = App.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		AD3EEE2CC09DCA15153DAABC /* SuzakuWidgetPlugin.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SuzakuWidgetPlugin.m; path = SuzakuWidgetPlugin.m; sourceTree = "<group>"; };
 		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
+		BF441076192A7C9868149F8C /* SuzakuWidgetPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SuzakuWidgetPlugin.swift; path = SuzakuWidgetPlugin.swift; sourceTree = "<group>"; };
 		E869C6B60C96A94AD2ABEA2B /* Base */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E8ADE306D52AD4B135625A87 /* SuzakuWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SuzakuWidgetBundle.swift; sourceTree = "<group>"; };
 		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -46,6 +89,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7B46620CB1B095683CB10F29 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				07BE93211CB89360DB76762D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -53,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */,
+				9CDBF8F58B5C3A33853D18DB /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -64,6 +116,7 @@
 				504EC3051FED79650016851F /* Products */,
 				7F8756D8B27F46E3366F6CEA /* Pods */,
 				27E2DDA53C4D2A4D1A88CE4A /* Frameworks */,
+				B11C4ABFCA756F4E13692FEF /* SuzakuWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -71,6 +124,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				7AAD86259729CDC26F2D85C5 /* SuzakuWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -88,6 +142,9 @@
 				50B271D01FEDC1A000F3C39B /* public */,
 				4C2D6FF422E95297648C1093 /* PrivacyInfo.xcprivacy */,
 				0356B04CF2CA0A7812D0F28C /* InfoPlist.strings */,
+				A01522D736985C0F6F33CE51 /* App.entitlements */,
+				BF441076192A7C9868149F8C /* SuzakuWidgetPlugin.swift */,
+				AD3EEE2CC09DCA15153DAABC /* SuzakuWidgetPlugin.m */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -99,6 +156,28 @@
 				AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		9CDBF8F58B5C3A33853D18DB /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				7CC4A5288B5C0DA1AEA5A7FC /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		B11C4ABFCA756F4E13692FEF /* SuzakuWidget */ = {
+			isa = PBXGroup;
+			children = (
+				E8ADE306D52AD4B135625A87 /* SuzakuWidgetBundle.swift */,
+				5D91DEAC44CF3A6E77AACBE1 /* SuzakuWidget.swift */,
+				226AC3A914EBDF145443DDB4 /* WidgetSnapshot.swift */,
+				3BEB944CF7B426485CBCC075 /* Info.plist */,
+				2D0EAE7E956CC2180DA08230 /* SuzakuWidget.entitlements */,
+				690533DF45F358037337A6C9 /* PrivacyInfo.xcprivacy */,
+			);
+			name = SuzakuWidget;
+			path = SuzakuWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -113,15 +192,34 @@
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
 				9592DBEFFC6D2A0C8D5DEB22 /* [CP] Embed Pods Frameworks */,
+				AE0636F8653584EA838DEC19 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				CCC67A28424AB33515A35D4D /* PBXTargetDependency */,
 			);
 			name = App;
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* App.app */;
 			productType = "com.apple.product-type.application";
+		};
+		DE63D41CA54EF9B9057172BC /* SuzakuWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FD81327E79EBF847236CC0D9 /* Build configuration list for PBXNativeTarget "SuzakuWidget" */;
+			buildPhases = (
+				F804940EE87664A61C00B05E /* Sources */,
+				7B46620CB1B095683CB10F29 /* Frameworks */,
+				E8EFA91942F6178B7C1655A5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SuzakuWidget;
+			productName = SuzakuWidget;
+			productReference = 7AAD86259729CDC26F2D85C5 /* SuzakuWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -154,6 +252,7 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				DE63D41CA54EF9B9057172BC /* SuzakuWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -171,6 +270,14 @@
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 				4CA61DF2D5E360F82B2FBCDC /* PrivacyInfo.xcprivacy in Resources */,
 				06C2EAA8205C899699658FAD /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8EFA91942F6178B7C1655A5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B339E44F821B4296D7C9657D /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -218,10 +325,31 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+				CFD30664E6A062312FC17C69 /* SuzakuWidgetPlugin.swift in Sources */,
+				120EC6D20D3AFF3AC0CAD28E /* SuzakuWidgetPlugin.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F804940EE87664A61C00B05E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				54E225B8BD4A3E8EC4D6A0A5 /* SuzakuWidgetBundle.swift in Sources */,
+				DA1F38E20CA2E97C4C21A45D /* SuzakuWidget.swift in Sources */,
+				90BA7AC7891DFECE33BE18AB /* WidgetSnapshot.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CCC67A28424AB33515A35D4D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SuzakuWidget;
+			target = DE63D41CA54EF9B9057172BC /* SuzakuWidget */;
+			targetProxy = 440D6BE2CCE6EB0C15285860 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		0356B04CF2CA0A7812D0F28C /* InfoPlist.strings */ = {
@@ -252,6 +380,27 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		4BA2416F33EC89F9BF2392AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = SuzakuWidget/SuzakuWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = SZ343VGXTL;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SuzakuWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tatsuyaariyama.ake.SuzakuWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		504EC3141FED79650016851F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -364,8 +513,10 @@
 			baseConfigurationReference = FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = SZ343VGXTL;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -384,8 +535,10 @@
 			baseConfigurationReference = AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = SZ343VGXTL;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -395,6 +548,28 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		59ED7E8D0F962B4F9A6CBC6B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = SuzakuWidget/SuzakuWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = SZ343VGXTL;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SuzakuWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tatsuyaariyama.ake.SuzakuWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -415,6 +590,15 @@
 			buildConfigurations = (
 				504EC3171FED79650016851F /* Debug */,
 				504EC3181FED79650016851F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FD81327E79EBF847236CC0D9 /* Build configuration list for PBXNativeTarget "SuzakuWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				59ED7E8D0F962B4F9A6CBC6B /* Release */,
+				4BA2416F33EC89F9BF2392AF /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
