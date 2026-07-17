@@ -1,7 +1,8 @@
 # App Store Connect — Listing Metadata
 
 App: **Suzaku — Tokyo Compass** (朱雀)
-Bundle ID: `com.tatsuyaariyama.ake`
+Bundle ID: `com.tatsuyaariyama.suzaku`
+App Store: `https://apps.apple.com/jp/app/id6788317890` (App ID `6788317890`)
 Version: `1.0.0` · Build: `1`
 Primary category: **Travel** · Secondary: **Navigation**
 Age rating: **4+** (no objectionable content)

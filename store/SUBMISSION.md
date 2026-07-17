@@ -1,7 +1,8 @@
 # Suzaku — iOS Submission Checklist
 
-App: **Suzaku — Tokyo Compass** (朱雀) · Bundle ID `com.tatsuyaariyama.ake`
+App: **Suzaku — Tokyo Compass** (朱雀) · Bundle ID `com.tatsuyaariyama.suzaku`
 Target: **v1.0.0 (build 1)**
+Live on the App Store: https://apps.apple.com/jp/app/id6788317890
 
 Requires macOS with Xcode + CocoaPods installed. Run from the repo root.
 
@@ -72,7 +73,7 @@ npm run cap:ios          # cap open ios
 
 ## 8. App Store Connect
 
-Create the app record (bundle id `com.tatsuyaariyama.ake`) and fill in from
+Create the app record (bundle id `com.tatsuyaariyama.suzaku`) and fill in from
 `store/app-store-listing.md`:
 
 - [ ] Name, Subtitle, Promotional text, Description, Keywords (EN + JA)

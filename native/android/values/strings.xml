@@ -3,7 +3,7 @@
 <resources>
     <string name="app_name">Suzaku</string>
     <string name="title_activity_main">Suzaku</string>
-    <string name="package_name">com.tatsuyaariyama.ake</string>
-    <string name="custom_url_scheme">com.tatsuyaariyama.ake</string>
+    <string name="package_name">com.tatsuyaariyama.suzaku</string>
+    <string name="custom_url_scheme">com.tatsuyaariyama.suzaku</string>
     <string name="location_rationale">Your location is used to compute the direction to your destination.</string>
 </resources>

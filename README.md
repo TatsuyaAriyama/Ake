@@ -4,7 +4,8 @@
 「道順」ではなく「あっちだよ」を美しいコンパス1枚で伝える。
 
 - デザイン哲学: **変化させる、足さない**
-- bundle id: `com.tatsuyaariyama.ake` ／ appName: `朱雀`
+- bundle id: `com.tatsuyaariyama.suzaku` ／ appName: `朱雀`
+- App Store: https://apps.apple.com/jp/app/id6788317890
 
 ## なぜ Google マップではなくこれか
 
