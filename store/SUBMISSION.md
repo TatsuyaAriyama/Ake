@@ -82,7 +82,8 @@ Create the app record (bundle id `com.tatsuyaariyama.ake`) and fill in from
 - [ ] Support URL → GitHub repo
 - [ ] App Privacy → **Data Not Collected** (see listing doc)
 - [ ] Upload marketing icon `store/AppStore-marketing-icon-1024.png`
-- [ ] Upload screenshots (6.9" required — see listing doc for shot list)
+- [ ] Upload screenshots — 6.9" 必須。日本語は `store/screenshots/ja/`、
+      英語は `store/screenshots/en/` を 01→05 の順で（各5枚・1320×2868）
 - [ ] Select the uploaded build
 - [ ] What's New = "First release. Welcome to Tokyo."
 - [ ] Submit for Review
