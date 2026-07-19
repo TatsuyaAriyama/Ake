@@ -55,6 +55,14 @@ Put the map away. Just follow the needle.
 tokyo,compass,travel,navigation,direction,offline,tourist,walk,station,restaurant,guide,japan,suzaku
 ```
 
+**What's New** (v1.1.0)
+```
+• Home and Lock Screen widgets — your destination and its direction, without opening the app
+• Compact view — just the needle and the distance
+• Much better search: one clean result per station, no more duplicates
+• Full English: station names, lines and operators now read in English
+```
+
 **What's New** (v1.0.0)
 ```
 First release. Welcome to Tokyo.
@@ -102,6 +110,14 @@ First release. Welcome to Tokyo.
 **Keywords** (max 100 chars)
 ```
 東京,コンパス,方位,旅行,ナビ,方向,オフライン,観光,散歩,駅,レストラン,案内,朱雀
+```
+
+**What's New** (v1.1.0)
+```
+• ホーム画面・ロック画面のウィジェットに対応。アプリを開かずに方向と距離がわかります
+• コンパクト表示を追加。針と距離だけの、いちばん静かな画面です
+• 検索を大きく改善。ひとつの駅がいくつも並ぶことがなくなりました
+• 英語表示を徹底。駅名・路線・事業者名も英語で表示されます
 ```
 
 **What's New** (v1.0.0)

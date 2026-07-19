@@ -10,13 +10,14 @@
 #   3. 朱雀パレットのマーケティングフレームを重ねて store/screenshots/{ja,en} へ出力
 #
 # 前提: dev サーバ (npm run dev) が :5173 で起動していること。
-#       node は PATH に無い場合 /Users/phos/.local/node/bin を通すこと。
 #
 # 注意: 旧ヘッドレス(--headless)では requestAnimationFrame が進まず、
 #       コンパスの針が回転しない。必ず --headless=new を使うこと。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+# node が PATH に無い環境向けに既定の導入先を足しておく。
+command -v node >/dev/null 2>&1 || export PATH="$HOME/.local/node/bin:$PATH"
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 WORK="${TMPDIR:-/tmp}/suzaku-store-$$"
 HARNESS="$ROOT/public/__capture.html"
