@@ -179,16 +179,20 @@ const KEY_RANK: Record<string, number> = {
 const keyRank = (k?: string): number => (k ? (KEY_RANK[k] ?? 2) : 0);
 
 /**
- * 重複判定用の名前キー（大小文字・空白・区切り記号・長音記号の揺れを吸収）。
- * OSM の英語名は "Tokyo" と "Tōkyō" が混在するため、マクロンを外さないと
- * 同じ東京駅が 2 行に分かれてしまう。
+ * 重複判定用の名前キー。大小文字・空白・区切り記号に加えて、
+ * ローマ字表記の揺れを吸収する。OSM の英語名は同じ対象でも
+ * "Tokyo" / "Tōkyō" / "Toukyou"、"Konno" / "Konnou" のように
+ * 長音の書き方がまちまちで、そのままでは同じ場所が 2 行に分かれる。
  */
 export function nameKey(s: string): string {
   return s
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[̀-ͯ]/g, '') // マクロン等の結合文字
     .toLowerCase()
-    .replace(/[\s　・･,.'’\-–—]/g, '');
+    .replace(/[\s　・･,.'’\-–—]/g, '')
+    .replace(/ou/g, 'o') // Konnou -> Konno
+    .replace(/oo/g, 'o') // Oosaka -> Osaka
+    .replace(/uu/g, 'u');
 }
 
 // 同名かつこの距離以内なら「同じ場所を指す別要素」とみなして 1 件にまとめる。
@@ -201,6 +205,47 @@ const DEDUPE_AREA_M = 2000;
 // 別々の対象だと分かっていても、まったく同じ名前がずらりと並ぶと一覧は読めない。
 // 同名はこの件数までに留める（チェーン店なら近い順に数件、で十分役に立つ）。
 const MAX_PER_NAME = 3;
+// ここから先は「東京に観光で来た人が行きたい場所」を上に出すための重み付け。
+// 朱雀は旅行者のためのコンパスなので、同じくらい名前が一致するなら、
+// 観光で向かう場所を、地元の人しか用の無い施設より先に出す。
+
+/** 旅行者が「向かいたい」場所。 */
+const TOURIST_HIGH = new Set([
+  'attraction', 'viewpoint', 'museum', 'gallery', 'artwork', 'theme_park',
+  'place_of_worship', 'shrine', 'temple', 'monument', 'memorial', 'castle',
+  'ruins', 'garden', 'park', 'zoo', 'aquarium', 'theatre', 'tower',
+  'observation_tower', 'mall', 'department_store', 'marketplace',
+  // 宿は旅行者にとって最重要の目的地のひとつ。
+  'hotel', 'hostel', 'guest_house', 'ryokan', 'onsen', 'public_bath',
+  'station',
+]);
+
+/** 用事があるのは地元の人だけ、という施設。消しはせず後ろに回す。 */
+const TOURIST_LOW = new Set([
+  'school', 'kindergarten', 'childcare', 'college', 'driving_school',
+  'hospital', 'clinic', 'doctors', 'dentist', 'veterinary', 'nursing_home',
+  'social_facility', 'townhall', 'courthouse', 'police', 'prison',
+  'fire_station', 'government', 'company', 'office', 'industrial',
+  'warehouse', 'garages', 'depot', 'car_repair', 'car_wash', 'works',
+  'funeral_directors', 'storage_rental', 'recycling', 'waste_disposal',
+]);
+
+/**
+ * 並べ替えの重み。大きいほど上。
+ * Photon の関連度は同点時の順序として残すので（sort は安定）、
+ * ここでは「観光で行くか」「英語で読めるか」だけを見る。
+ */
+function touristScore(place: Place, lang: Lang): number {
+  let score = 0;
+  const v = place.category;
+  if (v && TOURIST_HIGH.has(v)) score += 2;
+  else if (v && TOURIST_LOW.has(v)) score -= 3;
+  // 英語表示で、ラテン文字を一つも含まない名前は読めない。
+  // 落としはしない（OSM に英語名が無いだけで、場所自体は有用なため）。
+  if (lang === 'en' && !/[A-Za-z]/.test(place.name)) score -= 2;
+  return score;
+}
+
 // 遠方の同名候補を落とす距離。ただし判定は同名グループ単位で行うこと。
 // 一律に切ると成田空港・鎌倉・高尾山・横浜駅のように圏外にしか存在しない
 // 目的地がまるごと 0 件になり、「その場所は無い」と区別が付かなくなる。
@@ -338,6 +383,10 @@ export async function searchPlaces(
     }
     ordered.push(...list.slice(0, MAX_PER_NAME));
   }
+
+  // 観光での有用性で並べ替える。sort は安定なので、同点なら Photon の
+  // 関連度順がそのまま残る（「名前がどれだけ一致するか」は関連度側の仕事）。
+  ordered.sort((a, b) => touristScore(b, lang) - touristScore(a, lang));
   return ordered.slice(0, 10);
 }
 
