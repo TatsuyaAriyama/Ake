@@ -177,7 +177,7 @@ const items = raw.elements
 const byName = {};
 for (const it of items) (byName[it.name] = byName[it.name] || []).push(it);
 
-const merged = [];
+let merged = [];
 for (const name in byName) {
   const clusters = [];
   for (const it of byName[name]) {
@@ -202,10 +202,22 @@ for (const name in byName) {
   }
 }
 
+// 旅客駅ではない OSM の設備ノードを除く。railway=station が付いていても
+// 貨物駅・信号場は「行き先」にならず、検索で本物の駅を押しのけてしまう。
+// 判定材料が無い（路線も Wikidata も英語名も持たない）ものは旅客駅ではない。
+const before = merged.length;
+merged = merged.filter(
+  (m) => !(m.lines.length === 0 && !m.wikidata && !m.wikipedia && !m.en)
+);
+if (before !== merged.length) {
+  console.log(`  dropped ${before - merged.length} non-passenger entries`);
+}
+
 merged.sort((a, b) => (a.kana || a.name).localeCompare(b.kana || b.name, 'ja'));
 
 mkdirSync('src/data', { recursive: true });
-writeFileSync(OUT, JSON.stringify(merged));
+// 差分を読めるように整形して書く（データの変化をレビューできるようにするため）。
+writeFileSync(OUT, JSON.stringify(merged, null, 2) + '\n');
 
 console.log(`wrote ${merged.length} stations -> ${OUT}`);
 console.log(

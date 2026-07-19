@@ -129,9 +129,29 @@ interface OverpassEl {
   tags?: Record<string, string>;
 }
 
-/** トイレなど名前の無い POI 向けの見出し。 */
-function displayName(tags: Record<string, string>, fallback: string): string {
+/**
+ * 表示名。英語 UI では OSM の name:en を優先する。
+ * 日本の POI は name が日本語なので、これを見ないと英語表示でも
+ * 「スターバックス コーヒー 渋谷スクランブルスクエア店」のままになる。
+ */
+function displayName(
+  tags: Record<string, string>,
+  fallback: string,
+  lang: Lang
+): string {
+  if (lang === 'en') {
+    return tags['name:en'] || tags.name || tags['name:ja'] || fallback;
+  }
   return tags.name || tags['name:ja'] || tags['name:en'] || fallback;
+}
+
+/** 所在地の補足。英語 UI では日本語だけの住所タグを出さない。 */
+function nearbyContext(tags: Record<string, string>, lang: Lang): string {
+  const parts =
+    lang === 'en'
+      ? [tags['addr:neighbourhood:en'], tags['brand:en'] || tags.brand]
+      : [tags['addr:neighbourhood'], tags['addr:full'], tags.brand];
+  return parts.filter(Boolean).join(' · ');
 }
 
 /**
@@ -142,6 +162,7 @@ export async function searchNearby(
   cat: NearbyCategory,
   near: LatLon,
   fallbackName: string,
+  lang: Lang,
   signal?: AbortSignal
 ): Promise<Place[]> {
   const around = `(around:${RADIUS_M},${near.lat},${near.lon})`;
@@ -165,10 +186,8 @@ export async function searchNearby(
     const tags = el.tags ?? {};
     out.push({
       id,
-      name: displayName(tags, fallbackName),
-      context: [tags['addr:neighbourhood'], tags['addr:full'], tags.brand]
-        .filter(Boolean)
-        .join(' · '),
+      name: displayName(tags, fallbackName, lang),
+      context: nearbyContext(tags, lang),
       category: cat.id,
       lat,
       lon,

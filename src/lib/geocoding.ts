@@ -105,16 +105,37 @@ const NOISE_VALUES = new Set([
   'surveillance',
   'fire_hydrant',
   'post_box',
+  // 通路・階段・エレベーターなど。駅の階段が「東京」という名前で
+  // 登録されていたりするため、目的地の候補からは外す。
+  'steps',
+  'footway',
+  'path',
+  'cycleway',
+  'corridor',
+  'elevator',
+  'service',
+  'track',
+  'construction',
+  'proposed',
 ]);
 
 /**
- * 丁目（「渋谷一丁目」／英語では "Shibuya 1"）か。
- * 数が多いうえに目的地としては漠然としており、一覧を埋めて駅や施設を
- * 押し出してしまうので落とす。英語表記でも効くよう末尾の数字も見る。
+ * 丁目か。数が多いうえに目的地としては漠然としており、一覧を埋めて
+ * 駅や施設を押し出してしまうので落とす。
+ * OSM の英語名は表記が揺れる（"Shibuya 1" / "Shibuya 1-chōme" /
+ * "1 Chome-Shibuya"）ため、いずれの形にも当てる。
  */
+const CHOME_PATTERNS = [
+  /丁目$/,
+  /\s\d+$/, // "Shibuya 1"
+  /[-\s]ch(ō|o)me$/i, // "Shibuya 1-chōme"
+  /^\d+\s*ch(ō|o)me/i, // "1 Chome-Shibuya"
+];
+
 function isChome(p: NonNullable<PhotonFeature['properties']>): boolean {
   if (p.osm_key !== 'place' || !p.name) return false;
-  return /丁目$/.test(p.name) || /\s\d+$/.test(p.name);
+  const name = p.name;
+  return CHOME_PATTERNS.some((re) => re.test(name));
 }
 
 function isNoise(p: NonNullable<PhotonFeature['properties']>): boolean {
@@ -157,9 +178,17 @@ const KEY_RANK: Record<string, number> = {
 };
 const keyRank = (k?: string): number => (k ? (KEY_RANK[k] ?? 2) : 0);
 
-/** 重複判定用の名前キー（大小文字・空白・区切り記号の揺れを吸収）。 */
+/**
+ * 重複判定用の名前キー（大小文字・空白・区切り記号・長音記号の揺れを吸収）。
+ * OSM の英語名は "Tokyo" と "Tōkyō" が混在するため、マクロンを外さないと
+ * 同じ東京駅が 2 行に分かれてしまう。
+ */
 export function nameKey(s: string): string {
-  return s.toLowerCase().replace(/[\s　・･,.'’\-–—]/g, '');
+  return s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[\s　・･,.'’\-–—]/g, '');
 }
 
 // 同名かつこの距離以内なら「同じ場所を指す別要素」とみなして 1 件にまとめる。
@@ -172,8 +201,9 @@ const DEDUPE_AREA_M = 2000;
 // 別々の対象だと分かっていても、まったく同じ名前がずらりと並ぶと一覧は読めない。
 // 同名はこの件数までに留める（チェーン店なら近い順に数件、で十分役に立つ）。
 const MAX_PER_NAME = 3;
-// 徒歩と近距離移動のためのコンパスなので、これより遠い候補は落とす。
-// 東京の駅（22km 先の横浜など）は残り、同名なだけの県外の店舗は落ちる距離。
+// 遠方の同名候補を落とす距離。ただし判定は同名グループ単位で行うこと。
+// 一律に切ると成田空港・鎌倉・高尾山・横浜駅のように圏外にしか存在しない
+// 目的地がまるごと 0 件になり、「その場所は無い」と区別が付かなくなる。
 const MAX_DISTANCE_M = 25_000;
 
 /**
@@ -248,10 +278,7 @@ export async function searchPlaces(
       lat: coords[1],
       lon: coords[0],
     };
-    if (near) {
-      place.distanceM = distance(near, place);
-      if (place.distanceM > MAX_DISTANCE_M) continue;
-    }
+    if (near) place.distanceM = distance(near, place);
     // 駅と地区は「面」なので要素ごとに代表点が大きくぶれる。店舗は狭く。
     const radius = kind === 'poi' ? DEDUPE_M : DEDUPE_AREA_M;
 
@@ -300,7 +327,16 @@ export async function searchPlaces(
   for (const g of groups.values()) {
     if (near && g.length > 1)
       g.sort((a, b) => (a.distanceM ?? Infinity) - (b.distanceM ?? Infinity));
-    ordered.push(...g.slice(0, MAX_PER_NAME));
+    let list = g;
+    if (near) {
+      const close = g.filter((p) => (p.distanceM ?? 0) <= MAX_DISTANCE_M);
+      // 同名の候補が圏内にもあるなら、圏外のものは別物なので落とす
+      // （渋谷を探しているときの茂原市の「渋谷」）。逆に圏内に一つも
+      // 無いなら、その名前の場所は本当にそこにしか無い——成田空港も
+      // 鎌倉も横浜駅も 25km 圏外なので、切ると検索できなくなる。
+      if (close.length) list = close;
+    }
+    ordered.push(...list.slice(0, MAX_PER_NAME));
   }
   return ordered.slice(0, 10);
 }

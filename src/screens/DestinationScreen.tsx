@@ -141,6 +141,7 @@ export function DestinationScreen({ onDone }: Props) {
           activeCat,
           fix,
           categoryLabel(activeCat, lang),
+          lang,
           ctrl.signal
         );
         setNearby(r);
