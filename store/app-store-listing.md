@@ -129,17 +129,36 @@ In App Store Connect → App Privacy, answer:
 - 6.9" (iPhone 16 Pro Max) — 1320 × 2868 — **required**
 - 6.5" (iPhone 11 Pro Max / XS Max) — 1242 × 2688 — recommended fallback
 
-### Captured set — `store/screenshots/` (1320 × 2868, 6.9")
+### 掲載用セット — `store/screenshots/ja/` ・ `store/screenshots/en/`
 
-Captured in English on an iPhone 17 Pro Max simulator (same 6.9" canvas):
+朱雀のパレット（ink `#181311` / surface `#FCFBF8` / accent `#9F3327` / sand）で
+組んだマーケティング用フレーム。各 1320 × 2868（6.9"）、日英それぞれ5枚。
+背景は 濃 → 淡 → 朱 → 淡 → 濃 のリズム、見出しは上／下と交互に配置している。
 
-1. `01-welcome.png` — Onboarding, "Welcome to Tokyo"
-2. `02-home.png` — Home: compass + "Choose a destination" + Tokyo map
-3. `03-search.png` — Destination search ("Tokyo Tower") with live results
-4. `04-nearby.png` — Nearby Food category (distance-sorted list)
-5. `05-compass.png` — Compass pointing to a destination (109 m)
-6. `06-arrived.png` — Arrival mark ("Arrived")
+| # | ファイル | 背景 | 見出し(ja) | 見出し(en) |
+|---|---|---|---|---|
+| 1 | `01-direction.png` | ink | 方角だけで、街は歩ける。 | Only the direction. Nothing more. |
+| 2 | `02-find.png` | sand | 駅も店も、名前で見つかる。 | Stations and shops, found by name. |
+| 3 | `03-aligned.png` | accent | 合っていれば、この方向です。 | When it lines up, you'll know. |
+| 4 | `04-glance.png` | sand | 針と距離、それだけ。 | A needle and a distance. |
+| 5 | `05-arrive.png` | ink | 着いたら、そっと知らせる。 | A quiet nudge when you arrive. |
 
-Upload directly to App Store Connect. Order 1→6 tells the full story; pick any
-5+ for the 6.9" slot. For the 6.5" slot, re-run the capture on an iPhone 11
-Pro Max simulator, or let App Store Connect scale the 6.9" set.
+App Store Connect の 6.9" スロットへ、言語ごとにこの順で並べる。
+6.5" スロットは 6.9" セットの自動スケールで足りる。
+
+**再生成**（コピーや配色を変えたいとき）:
+
+```bash
+npm run dev                          # :5173 で起動しておく
+bash scripts/store/make-screenshots.sh
+```
+
+- 文言・配色・構成は `scripts/store/build-frames.mjs` の `COPY` / `THEMES` / `FRAMES`
+- アプリ画面の状態（目的地・方位・言語）は `scripts/store/capture-harness.html`
+- 端末モックアップは下端からはみ出させ、ミニマップがフレーム外に落ちるようにしている。
+  `.env` に `VITE_MAPTILER_KEY` を入れて撮り直せば、地図入りの構図にもできる。
+
+### 旧素材 — `store/screenshots/raw-v1.0/`
+
+v1.0 提出時に実機シミュレータで撮った素のキャプチャ6点（英語・実地図入り）。
+装飾なし。当時の MapTiler キーで撮影しており、キー無しでは再生成できないため保管。

@@ -1,0 +1,132 @@
+<!doctype html>
+<!-- 一時的な撮影ハーネス（ストア用スクリーンショット素材の生成）。撮影後に削除する。 -->
+<meta charset="utf-8">
+<title>capture</title>
+<style>
+  html,body{margin:0;padding:0;background:#FCFBF8;overflow:hidden}
+  #app{width:440px;height:956px;border:0;display:block}
+</style>
+<iframe id="app"></iframe>
+<script>
+const P = new URLSearchParams(location.search);
+const SCREEN = P.get('screen') || 'glance';
+const LANG = P.get('lang') || 'ja';
+
+// 撮影用の座標（渋谷まわり）
+const ME = { latitude: 35.6595, longitude: 139.7005, accuracy: 8 };
+const DESTS = {
+  glance:  { ja:'代々木公園',   en:'Yoyogi Park',  lat:35.6720, lon:139.6947 },
+  compass: { ja:'東京タワー',   en:'Tokyo Tower',  lat:35.6586, lon:139.7454 },
+  aligned: { ja:'明治神宮',     en:'Meiji Jingu',  lat:35.6764, lon:139.6993 },
+  search:  { ja:'代々木公園',   en:'Yoyogi Park',  lat:35.6720, lon:139.6947 },
+  arrived: { ja:'ブルーボトル', en:'Blue Bottle',  lat:35.65966, lon:139.70062 },
+};
+
+const d = DESTS[SCREEN] || DESTS.glance;
+const dest = { name: d[LANG], lat: d.lat, lon: d.lon };
+
+// Capacitor Preferences の web 実装は localStorage(CapacitorStorage.<key>) を使う
+function seed() {
+  const S = 'CapacitorStorage.ake.';
+  localStorage.setItem(S + 'onboarded', 'true');
+  localStorage.setItem(S + 'destination', JSON.stringify(dest));
+  localStorage.setItem(S + 'settings', JSON.stringify({
+    units: 'km', northRef: 'true', haptics: true, lang: LANG,
+    glance: SCREEN === 'glance',
+  }));
+}
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const frame = document.getElementById('app');
+
+// 実機のセーフエリア相当の余白を作る（モックアップにステータスバーを重ねるため）
+function applySafeArea(w) {
+  const st = w.document.createElement('style');
+  st.textContent = ':root{--safe-top:44px !important;--safe-bottom:34px !important}';
+  w.document.head.appendChild(st);
+}
+
+function installMocks(w) {
+  // 位置情報のモック
+  const geo = {
+    watchPosition(ok) { setTimeout(() => ok({ coords: ME, timestamp: Date.now() }), 0); return 1; },
+    clearWatch() {},
+    getCurrentPosition(ok) { ok({ coords: ME, timestamp: Date.now() }); },
+  };
+  Object.defineProperty(w.navigator, 'geolocation', { value: geo, configurable: true });
+
+  // 可視状態を操作できるようにして、購読をやり直させる
+  let hidden = false;
+  Object.defineProperty(w.document, 'hidden', { get: () => hidden, configurable: true });
+  Object.defineProperty(w.document, 'visibilityState', { get: () => hidden ? 'hidden' : 'visible', configurable: true });
+  hidden = true;  w.document.dispatchEvent(new w.Event('visibilitychange'));
+  hidden = false; w.document.dispatchEvent(new w.Event('visibilitychange'));
+}
+
+function sendHeading(w, alpha) {
+  // ヘッドレスでは ondeviceorientationabsolute が無く 'deviceorientation' を
+  // 購読している場合があるため、両方の型を送る。
+  for (const type of ['deviceorientationabsolute', 'deviceorientation']) {
+    w.dispatchEvent(new w.DeviceOrientationEvent(type,
+      { absolute: true, alpha, beta: 0, gamma: 0 }));
+  }
+}
+
+const q = (w, sel) => w.document.querySelector(sel);
+const hintText = (w) => (q(w, '.hint')?.textContent || '').trim();
+
+// 望む状態になる alpha を総当たりで探す（偏角や丸めを考えずに確実に当てる）
+async function findAlpha(w, ok) {
+  for (let a = 0; a < 360; a += 1) {
+    sendHeading(w, a);
+    await sleep(0);
+    if (ok(w)) return a;
+  }
+  return null;
+}
+
+async function setSearchQuery(w, text) {
+  const input = q(w, 'input');
+  if (!input) return;
+  const setter = Object.getOwnPropertyDescriptor(w.HTMLInputElement.prototype, 'value').set;
+  setter.call(input, text);
+  input.dispatchEvent(new w.Event('input', { bubbles: true }));
+}
+
+async function run() {
+  const w = frame.contentWindow;
+  applySafeArea(w);
+  installMocks(w);
+  await sleep(400);
+
+  if (SCREEN === 'search') {
+    // 行き先画面へ移動して、駅名で検索した状態にする
+    const pin = [...w.document.querySelectorAll('.topbar .icon-btn')].pop();
+    pin?.click();
+    await sleep(300);
+    await setSearchQuery(w, LANG === 'ja' ? '渋谷' : 'Shibuya');
+    await sleep(700);
+  } else if (SCREEN === 'aligned') {
+    await findAlpha(w, (ww) => !!q(ww, '.aligned-note'));
+    await sleep(700); // 整列時の色変化(400ms)を待つ
+  } else if (SCREEN === 'compass') {
+    // 「右へ →」の案内が出る向きにする
+    const want = LANG === 'ja' ? '右へ' : 'Turn right';
+    await findAlpha(w, (ww) => hintText(ww).includes(want));
+    await sleep(600);
+  } else if (SCREEN === 'glance') {
+    sendHeading(w, 300);
+    await sleep(600);
+  } else if (SCREEN === 'arrived') {
+    sendHeading(w, 300);
+    await sleep(600);
+  }
+
+  await sleep(500);
+  document.title = 'READY';
+}
+
+frame.addEventListener('load', () => { run(); }, { once: true });
+seed();
+frame.src = '/?t=' + Date.now();
+</script>
