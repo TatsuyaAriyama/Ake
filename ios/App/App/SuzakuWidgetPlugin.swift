@@ -7,11 +7,11 @@ import WidgetKit
 /// ウィジェットのタイムライン更新を要求する。
 ///
 /// 前提: App ターゲットと Widget ターゲットの双方で同じ App Group
-///       `group.com.tatsuyaariyama.ake` を有効化しておくこと（docs/WIDGET_SETUP.md 参照）。
+///       `group.com.tatsuyaariyama.suzaku` を有効化しておくこと（docs/WIDGET_SETUP.md 参照）。
 @objc(SuzakuWidgetPlugin)
 public class SuzakuWidgetPlugin: CAPPlugin {
     /// Widget 側 (SnapshotStore) と必ず一致させる。
-    private let suiteName = "group.com.tatsuyaariyama.ake"
+    private let suiteName = "group.com.tatsuyaariyama.suzaku"
     private let key = "snapshot"
 
     @objc func update(_ call: CAPPluginCall) {
