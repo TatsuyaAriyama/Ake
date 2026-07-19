@@ -43,8 +43,11 @@ export const NEARBY_CATEGORIES: NearbyCategory[] = [
     en: 'Sights',
     // 商業施設まで含める。旅行者が渋谷で実際に向かうのはパルコ・109・
     // ヒカリエ・スクランブルスクエアであって、郷土資料館ではない。
+    // artwork（壁画・像・オブジェ）は入れない。街角の彫刻や記念碑が
+    // 数多く登録されており、目的地というより通りすがりに見るものなので、
+    // 一覧を埋めて実際に人が向かう施設を押し出してしまう。
     filter:
-      '["tourism"~"^(attraction|museum|viewpoint|artwork|gallery|theme_park)$"]',
+      '["tourism"~"^(attraction|museum|viewpoint|gallery|theme_park)$"]',
     // 渋谷スクランブルスクエアのように shop も tourism も持たず
     // building=retail だけの大型施設がある。Wikidata 項目を持つものに
     // 限れば、その辺の店舗ビルを巻き込まずに拾える。
@@ -169,7 +172,26 @@ function notability(tags: Record<string, string>): number {
   return tags.wikidata || tags.wikipedia ? 1 : 0;
 }
 
+/**
+ * Overpass は無償の共有インスタンスで、混雑時や短時間に叩いたときに
+ * 一時的に失敗する。全ミラーが落ちたら少し待って一度だけやり直す。
+ * これが無いと、たまたま混んでいただけで利用者にはエラー画面が出る。
+ */
 async function runOverpass(
+  query: string,
+  signal?: AbortSignal
+): Promise<{ elements?: OverpassEl[] }> {
+  try {
+    return await tryOverpass(query, signal);
+  } catch (e) {
+    if ((e as Error).name === 'AbortError') throw e;
+    await new Promise((r) => setTimeout(r, 1200));
+    if (signal?.aborted) throw new DOMException('aborted', 'AbortError');
+    return tryOverpass(query, signal);
+  }
+}
+
+async function tryOverpass(
   query: string,
   signal?: AbortSignal
 ): Promise<{ elements?: OverpassEl[] }> {
