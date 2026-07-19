@@ -176,7 +176,31 @@ const KEY_RANK: Record<string, number> = {
   highway: 1,
   emergency: 1,
 };
-const keyRank = (k?: string): number => (k ? (KEY_RANK[k] ?? 2) : 0);
+/**
+ * 施設に併設された設備。ランドマークと同じ名前が付いていることが多いので、
+ * 畳むときにこちらの種別を採ってはいけない。
+ * （東京タワーの脇のシェアサイクルポートも「東京タワー」という名前で、
+ *   amenity は man_made より上位のため、本物が「レンタサイクル」と表示された）
+ */
+const SUB_FEATURE_VALUES = new Set([
+  'bicycle_rental',
+  'parking',
+  'parking_entrance',
+  'atm',
+  'toilets',
+  'drinking_water',
+  'telephone',
+  'shelter',
+  'charging_station',
+  'bench',
+  'smoking_area',
+  'locker',
+]);
+
+const keyRank = (k?: string, v?: string): number => {
+  if (v && SUB_FEATURE_VALUES.has(v)) return 1;
+  return k ? (KEY_RANK[k] ?? 2) : 0;
+};
 
 /**
  * 重複判定用の名前キー。大小文字・空白・区切り記号に加えて、
@@ -205,51 +229,51 @@ const DEDUPE_AREA_M = 2000;
 // 別々の対象だと分かっていても、まったく同じ名前がずらりと並ぶと一覧は読めない。
 // 同名はこの件数までに留める（チェーン店なら近い順に数件、で十分役に立つ）。
 const MAX_PER_NAME = 3;
-// ここから先は「東京に観光で来た人が行きたい場所」を上に出すための重み付け。
-// 朱雀は旅行者のためのコンパスなので、同じくらい名前が一致するなら、
-// 観光で向かう場所を、地元の人しか用の無い施設より先に出す。
+// 東京に観光で来た人のためのアプリなので、名前で検索したときに
+// 「そもそも誰も行かない施設」を下に送る。
+//
+// 降格しかしない。観光地を昇格させてはいけない——一度そうしたところ、
+// 「Tokyo Tower」で Cerulean Tower Tokyo Hotel が 1 位になり、本物の
+// 東京タワーが押し出された。「Imperial Palace」では海外の Imperial Palace
+// Hotel が並び、「pharmacy」ではトロントの地下鉄駅が 1 位に来た。
+// 名前がどれだけ一致しているかは Photon の関連度が持っているので、そこは崩さない。
 
-/** 旅行者が「向かいたい」場所。 */
-const TOURIST_HIGH = new Set([
-  'attraction', 'viewpoint', 'museum', 'gallery', 'artwork', 'theme_park',
-  'place_of_worship', 'shrine', 'temple', 'monument', 'memorial', 'castle',
-  'ruins', 'garden', 'park', 'zoo', 'aquarium', 'theatre', 'tower',
-  'observation_tower', 'mall', 'department_store', 'marketplace',
-  // 宿は旅行者にとって最重要の目的地のひとつ。
-  'hotel', 'hostel', 'guest_house', 'ryokan', 'onsen', 'public_bath',
-  'station',
-]);
-
-/** 用事があるのは地元の人だけ、という施設。消しはせず後ろに回す。 */
+/**
+ * 名前で検索してたどり着きたい人がまずいない施設。
+ *
+ * 医療・警察・消防は入れないこと。旅行者が本当に困ったときに探すのは
+ * まさにそれで、下に送ると危険。同じ理由で役所・議事堂・裁判所も入れない
+ * （都庁の展望室も国会議事堂も観光の行き先になる）。
+ */
 const TOURIST_LOW = new Set([
   'school', 'kindergarten', 'childcare', 'college', 'driving_school',
-  'hospital', 'clinic', 'doctors', 'dentist', 'veterinary', 'nursing_home',
-  'social_facility', 'townhall', 'courthouse', 'police', 'prison',
-  'fire_station', 'government', 'company', 'office', 'industrial',
-  'warehouse', 'garages', 'depot', 'car_repair', 'car_wash', 'works',
-  'funeral_directors', 'storage_rental', 'recycling', 'waste_disposal',
+  'veterinary', 'nursing_home', 'social_facility', 'prison',
+  'company', 'office', 'industrial', 'warehouse', 'garages', 'depot',
+  'car_repair', 'car_wash', 'works', 'funeral_directors', 'storage_rental',
+  'recycling', 'waste_disposal',
 ]);
 
 /**
- * 並べ替えの重み。大きいほど上。
- * Photon の関連度は同点時の順序として残すので（sort は安定）、
- * ここでは「観光で行くか」「英語で読めるか」だけを見る。
+ * 後ろに送る度合い（0 なら据え置き）。安定ソートと組み合わせるので、
+ * 降格対象以外の並びは Photon の関連度のまま変わらない。
  */
-function touristScore(place: Place, lang: Lang): number {
-  let score = 0;
-  const v = place.category;
-  if (v && TOURIST_HIGH.has(v)) score += 2;
-  else if (v && TOURIST_LOW.has(v)) score -= 3;
+function demotion(place: Place, lang: Lang): number {
+  let d = 0;
+  if (place.category && TOURIST_LOW.has(place.category)) d += 2;
   // 英語表示で、ラテン文字を一つも含まない名前は読めない。
   // 落としはしない（OSM に英語名が無いだけで、場所自体は有用なため）。
-  if (lang === 'en' && !/[A-Za-z]/.test(place.name)) score -= 2;
-  return score;
+  if (lang === 'en' && !/[A-Za-z]/.test(place.name)) d += 1;
+  return d;
 }
 
 // 遠方の同名候補を落とす距離。ただし判定は同名グループ単位で行うこと。
 // 一律に切ると成田空港・鎌倉・高尾山・横浜駅のように圏外にしか存在しない
 // 目的地がまるごと 0 件になり、「その場所は無い」と区別が付かなくなる。
 const MAX_DISTANCE_M = 25_000;
+// 圏外にしか無いなら遠くても返す、という上の例外にも天井は要る。
+// 「pharmacy」で 10,344km 先のトロントの駅が 1 位に来ていた。
+// 日本国内の日帰り圏（箱根 78km・富士山 100km）は残る値。
+const HARD_MAX_DISTANCE_M = 150_000;
 
 /**
  * 畳み込みの単位。種別をまたいだ統合はしない。
@@ -323,7 +347,10 @@ export async function searchPlaces(
       lat: coords[1],
       lon: coords[0],
     };
-    if (near) place.distanceM = distance(near, place);
+    if (near) {
+      place.distanceM = distance(near, place);
+      if (place.distanceM > HARD_MAX_DISTANCE_M) continue;
+    }
     // 駅と地区は「面」なので要素ごとに代表点が大きくぶれる。店舗は狭く。
     const radius = kind === 'poi' ? DEDUPE_M : DEDUPE_AREA_M;
 
@@ -338,7 +365,7 @@ export async function searchPlaces(
     if (dup) {
       if (!dup.place.context && place.context) dup.place.context = place.context;
       // 説明力の高い種別表記を残す（assembly_point より shop=mall）。
-      const rank = keyRank(p.osm_key);
+      const rank = keyRank(p.osm_key, p.osm_value);
       if (rank > dup.rank) {
         dup.place.category = place.category;
         dup.rank = rank;
@@ -354,7 +381,7 @@ export async function searchPlaces(
       }
       continue;
     }
-    entries.push({ place, kind, rank: keyRank(p.osm_key) });
+    entries.push({ place, kind, rank: keyRank(p.osm_key, p.osm_value) });
   }
   const out = entries.map((e) => e.place);
 
@@ -384,9 +411,9 @@ export async function searchPlaces(
     ordered.push(...list.slice(0, MAX_PER_NAME));
   }
 
-  // 観光での有用性で並べ替える。sort は安定なので、同点なら Photon の
-  // 関連度順がそのまま残る（「名前がどれだけ一致するか」は関連度側の仕事）。
-  ordered.sort((a, b) => touristScore(b, lang) - touristScore(a, lang));
+  // 学校や車庫など、名前で探す人がいない施設だけを後ろに送る。
+  // sort は安定なので、それ以外の並びは Photon の関連度のまま残る。
+  ordered.sort((a, b) => demotion(a, lang) - demotion(b, lang));
   return ordered.slice(0, 10);
 }
 

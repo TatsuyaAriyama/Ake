@@ -23,6 +23,13 @@ export interface NearbyCategory {
    * コンビニやトイレは純粋に近い順でよいので既定は無効。
    */
   byNotability?: boolean;
+  /**
+   * 検索半径（m）。既定は RADIUS_M。
+   * 飲食店のように密度の高いカテゴリは、渋谷だと 1.5km 圏に 967 件あって
+   * 取得に 13 秒かかる。表示は 24 件で、渋谷では 100m 圏で埋まってしまうので、
+   * 半径を詰めても失うものは無く、待ち時間だけが減る。
+   */
+  radiusM?: number;
 }
 
 // 徒歩コンパスで「今すぐ向かいたい」場所を厳選。
@@ -36,15 +43,15 @@ export const NEARBY_CATEGORIES: NearbyCategory[] = [
     byNotability: true,
   },
   {
-    id: 'temple',
+    id: 'worship',
     ja: '寺社',
     en: 'Temples & shrines',
     filter: '["amenity"="place_of_worship"]',
     byNotability: true,
   },
-  { id: 'food', ja: '飲食店', en: 'Food', filter: '["amenity"~"^(restaurant|fast_food)$"]' },
-  { id: 'cafe', ja: 'カフェ', en: 'Cafe', filter: '["amenity"="cafe"]' },
-  { id: 'convenience', ja: 'コンビニ', en: 'Convenience', filter: '["shop"="convenience"]' },
+  { id: 'food', ja: '飲食店', en: 'Food', filter: '["amenity"~"^(restaurant|fast_food)$"]', radiusM: 800 },
+  { id: 'cafe', ja: 'カフェ', en: 'Cafe', filter: '["amenity"="cafe"]', radiusM: 800 },
+  { id: 'convenience', ja: 'コンビニ', en: 'Convenience', filter: '["shop"="convenience"]', radiusM: 800 },
   { id: 'shopping', ja: 'ショッピング', en: 'Shopping', filter: '["shop"~"^(mall|department_store)$"]' },
   { id: 'park', ja: '公園', en: 'Parks', filter: '["leisure"="park"]', keepUnnamed: true },
   { id: 'toilet', ja: 'トイレ', en: 'Toilets', filter: '["amenity"="toilets"]', keepUnnamed: true },
@@ -132,19 +139,18 @@ const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
 ];
 const RADIUS_M = 1500;
-const FETCH_LIMIT = 250;
 
 /**
- * その地物がどれだけ知られているか。Wikipedia/Wikidata に項目があるか、
- * 観光地として登録されているかで測る。
+ * その地物がどれだけ知られているか。Wikipedia / Wikidata に項目があるかで測る。
  * 浅草で「寺社」を開いたとき、名も無い祠が距離順に並ぶより、
  * 浅草寺・浅草神社が先に出てほしい——旅行者向けのアプリなので。
+ *
+ * tourism=attraction は使わない。「観光スポット」カテゴリの絞り込み条件が
+ * すでに attraction を含んでいるため、著名さではなく単に美術館や展望台より
+ * attraction を優遇するだけの偏りになる。
  */
 function notability(tags: Record<string, string>): number {
-  let n = 0;
-  if (tags.wikidata || tags.wikipedia) n += 2;
-  if (tags.tourism === 'attraction') n += 1;
-  return n;
+  return tags.wikidata || tags.wikipedia ? 2 : 0;
 }
 
 async function runOverpass(
@@ -215,22 +221,25 @@ export async function searchNearby(
   lang: Lang,
   signal?: AbortSignal
 ): Promise<Place[]> {
-  const around = `(around:${RADIUS_M},${near.lat},${near.lon})`;
+  const around = `(around:${cat.radiusM ?? RADIUS_M},${near.lat},${near.lon})`;
   const f = cat.filter;
   // relation まで拾うこと。大きな寺社・公園は面（way / マルチポリゴン）で
   // 表されており、node だけでは欠落する。
-  // 件数の上限は大きく取る。Overpass は node → way → relation の順に返すため、
-  // 上限が小さいと小さな祠のノードだけで埋まり、肝心の浅草寺（way）に
-  // 届かないまま打ち切られてしまう（実際 60 件では届いていなかった）。
+  // 件数で打ち切ってはいけない。Overpass は「近い順」ではなく
+  // type → id の昇順で返すので、`out center 250` は「最寄り250件」ではなく
+  // 「OSM に古くから登録されている250件」になる。渋谷の飲食店は範囲内に
+  // 967件あり、上限を付けると最寄り24件のうち18件が落ちていた（way は
+  // 一件も届かない）。範囲は半径 1.5km で押さえてあるので、全件取って
+  // こちらで距離順に並べる。
   const query =
     `[out:json][timeout:25];` +
     `(node${f}${around};way${f}${around};relation${f}${around};);` +
-    `out center ${FETCH_LIMIT};`;
+    `out center;`;
 
   const data = await runOverpass(query, signal);
 
   const seen = new Set<string>();
-  const out: { place: Place; note: number }[] = [];
+  const out: { place: Place; note: number; named: boolean }[] = [];
   for (const el of data.elements ?? []) {
     const lat = el.lat ?? el.center?.lat;
     const lon = el.lon ?? el.center?.lon;
@@ -242,11 +251,21 @@ export async function searchNearby(
     const named = tags.name || tags['name:ja'] || tags['name:en'];
     if (!named && !cat.keepUnnamed) continue;
     out.push({
+      named: !!named,
       place: {
         id,
         name: displayName(tags, fallbackName, lang),
         context: nearbyContext(tags, lang),
-        category: cat.id,
+        // 寺社は神社と寺を取り違えないよう religion タグから判定する
+        // （まとめて「寺」と出すと神社を仏教寺院だと言うことになる）。
+        category:
+          cat.id === 'worship'
+            ? tags.religion === 'shinto'
+              ? 'shrine'
+              : tags.religion === 'buddhist'
+                ? 'temple'
+                : 'place_of_worship'
+            : cat.id,
         lat,
         lon,
         distanceM: distance(near, { lat, lon }),
@@ -261,6 +280,10 @@ export async function searchNearby(
     o.note - (o.place.distanceM ?? 0) / 1000;
   out.sort((a, b) => rank(b) - rank(a));
 
+  // 名前の無い地物は畳まない。名前が無いものは表示名がカテゴリ名
+  // （「トイレ」等）で全部同じになるため、名前で重複判定すると
+  // 別々のトイレが軒並み消える（上野公園で 81 件中 46 件が消えていた）。
+
   // 同じ対象が node と way の二重で登録されていることがある
   // （金王八幡宮が 419m と 438m に 2 件など）。近接した同名は 1 件に畳む。
   // 近接していて、片方の名前がもう片方の頭から一致するなら同じ対象とみなす。
@@ -268,14 +291,18 @@ export async function searchNearby(
   // 種別語が付いたり付かなかったりするため、完全一致では畳めない。
   // 前方一致に限るので「雷門」と「仲見世商店街」のような別物は残る。
   const picked: Place[] = [];
-  for (const { place } of out) {
-    const key = nameKey(place.name);
-    const dup = picked.some((p) => {
-      if (distance(p, place) >= 250) return false;
-      const k = nameKey(p.name);
-      return k === key || k.startsWith(key) || key.startsWith(k);
-    });
-    if (dup) continue;
+  const namedPicked: Place[] = [];
+  for (const { place, named } of out) {
+    if (named) {
+      const key = nameKey(place.name);
+      const dup = namedPicked.some((p) => {
+        if (distance(p, place) >= 250) return false;
+        const k = nameKey(p.name);
+        return k === key || k.startsWith(key) || key.startsWith(k);
+      });
+      if (dup) continue;
+      namedPicked.push(place);
+    }
     picked.push(place);
     if (picked.length >= 24) break;
   }
