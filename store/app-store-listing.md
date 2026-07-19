@@ -154,7 +154,7 @@ In App Store Connect → App Privacy, answer:
 | # | ファイル | 背景 | 見出し(ja) | 見出し(en) |
 |---|---|---|---|---|
 | 1 | `01-direction.png` | ink | 方角だけで、街は歩ける。 | Only the direction. Nothing more. |
-| 2 | `02-find.png` | sand | 駅も店も、名前で見つかる。 | Stations and shops, found by name. |
+| 2 | `02-find.png` | sand | 名所は、近い順に。 | The sights, nearest first. |
 | 3 | `03-aligned.png` | accent | 合っていれば、この方向です。 | When it lines up, you'll know. |
 | 4 | `04-glance.png` | sand | 針と距離、それだけ。 | A needle and a distance. |
 | 5 | `05-arrive.png` | ink | 着いたら、そっと知らせる。 | A quiet nudge when you arrive. |

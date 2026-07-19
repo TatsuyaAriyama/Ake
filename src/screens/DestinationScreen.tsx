@@ -265,6 +265,10 @@ export function DestinationScreen({ onDone }: Props) {
                     key={r.id}
                     place={r}
                     lang={lang}
+                    // 見出しが「近くの観光スポット」なのに全行へ
+                    // 「観光スポット」と付けても情報が増えない。
+                    // 寺社だけは神社／寺の区別が付くので出す。
+                    hideBadge={r.category === activeCat.id}
                     fav={isFav(r)}
                     dist={distOf(r)}
                     onChoose={() => choose(r)}
@@ -391,6 +395,7 @@ function PlaceRow({
   lang,
   fav,
   dist,
+  hideBadge,
   onChoose,
   onToggleFav,
 }: {
@@ -398,10 +403,11 @@ function PlaceRow({
   lang: Lang;
   fav: boolean;
   dist: { value: string; unit: string } | null;
+  hideBadge?: boolean;
   onChoose: () => void;
   onToggleFav: () => void;
 }) {
-  const badge = poiLabel(place.category, lang);
+  const badge = hideBadge ? null : poiLabel(place.category, lang);
   const ctx = [badge, place.context].filter(Boolean).join(' · ');
   return (
     <li className="result">

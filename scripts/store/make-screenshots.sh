@@ -38,13 +38,13 @@ sleep 1   # vite が public/ の新規ファイルを配信し始めるのを待
 render() { # url out [w] [h]
   "$CHROME" --headless=new --disable-gpu --no-sandbox --hide-scrollbars \
     --allow-file-access-from-files --force-device-scale-factor=3 \
-    --window-size="${3:-440},${4:-956}" --virtual-time-budget=12000 \
+    --window-size="${3:-440},${4:-956}" --virtual-time-budget=25000 \
     --screenshot="$2" "$1" >/dev/null 2>&1
 }
 
 echo "1/3  アプリ画面を撮影"
 for lang in ja en; do
-  for screen in glance compass aligned search arrived; do
+  for screen in glance compass aligned sights arrived; do
     render "$BASE/__capture.html?screen=$screen&lang=$lang" "$WORK/shots/$lang-$screen.png"
     printf '  %s/%s\n' "$lang" "$screen"
   done

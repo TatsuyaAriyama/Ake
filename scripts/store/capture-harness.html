@@ -19,6 +19,7 @@ const DESTS = {
   compass: { ja:'東京タワー',   en:'Tokyo Tower',  lat:35.6586, lon:139.7454 },
   aligned: { ja:'明治神宮',     en:'Meiji Jingu',  lat:35.6764, lon:139.6993 },
   search:  { ja:'代々木公園',   en:'Yoyogi Park',  lat:35.6720, lon:139.6947 },
+  sights:  { ja:'代々木公園',   en:'Yoyogi Park',  lat:35.6720, lon:139.6947 },
   arrived: { ja:'ブルーボトル', en:'Blue Bottle',  lat:35.65966, lon:139.70062 },
 };
 
@@ -106,6 +107,15 @@ async function run() {
     await sleep(300);
     await setSearchQuery(w, LANG === 'ja' ? '渋谷' : 'Shibuya');
     await sleep(700);
+  } else if (SCREEN === 'sights') {
+    // 行き先画面 →「観光スポット」カテゴリ（チップの先頭）を開いた状態にする
+    const pin = [...w.document.querySelectorAll('.topbar .icon-btn')].pop();
+    pin?.click();
+    await sleep(300);
+    w.document.querySelector('.cat-chip')?.click();
+    // Overpass の応答待ち。混み具合で数秒かかるので結果行が出るまで待つ。
+    for (let i = 0; i < 150 && !q(w, '.results__list .result'); i++) await sleep(100);
+    await sleep(600);
   } else if (SCREEN === 'aligned') {
     await findAlpha(w, (ww) => !!q(ww, '.aligned-note'));
     await sleep(700); // 整列時の色変化(400ms)を待つ

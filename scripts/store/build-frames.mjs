@@ -28,7 +28,7 @@ const THEMES = {
 // 5枚の構成: 濃→淡→朱→淡→濃 でリズムを作り、文字位置も上/下で交互にする
 const FRAMES = [
   { id: '01-direction', shot: 'compass', theme: 'ink',     layout: 'top'    },
-  { id: '02-find',      shot: 'search',  theme: 'sand',    layout: 'bottom' },
+  { id: '02-find',      shot: 'sights',  theme: 'sand',    layout: 'bottom' },
   { id: '03-aligned',   shot: 'aligned', theme: 'accent',  layout: 'top'    },
   { id: '04-glance',    shot: 'glance',  theme: 'sand2',   layout: 'bottom' },
   { id: '05-arrive',    shot: 'arrived', theme: 'ink',     layout: 'top'    },
@@ -39,8 +39,8 @@ const COPY = {
   ja: {
     '01-direction': { h: ['**方角**だけで、', '街は歩ける。'],
       s: '地図を読まなくていい。目的地への方向と距離だけ。' },
-    '02-find': { h: ['駅も店も、', '**名前で**見つかる。'],
-      s: '東京の駅を網羅。近くのお店もカテゴリから探せます。' },
+    '02-find': { h: ['名所は、', '**近い順に**。'],
+      s: '観光スポットも寺社も、カテゴリからすぐ。駅や店は名前でも探せます。' },
     '03-aligned': { h: ['合っていれば、', '**この方向です**。'],
       s: '針が赤くなり、手のひらにも合図します。' },
     '04-glance': { h: ['**針と距離**、', 'それだけ。'],
@@ -51,8 +51,8 @@ const COPY = {
   en: {
     '01-direction': { h: ['Only the **direction**.', 'Nothing more.'],
       s: 'No map to read — just the way to go and how far.' },
-    '02-find': { h: ['Stations and shops,', '**found by name**.'],
-      s: 'Every Tokyo station, plus nearby places by category.' },
+    '02-find': { h: ['The sights,', '**nearest first**.'],
+      s: 'Browse sights and temples by category — or search any station by name.' },
     '03-aligned': { h: ['When it lines up,', '**you’ll know**.'],
       s: 'The needle turns red — and your palm feels it.' },
     '04-glance': { h: ['A needle and', 'a **distance**.'],
