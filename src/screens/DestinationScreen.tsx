@@ -1,7 +1,20 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { searchPlaces, hasGeocoder, type Place } from '../lib/geocoding';
+import {
+  searchPlaces,
+  hasGeocoder,
+  nameKey,
+  STATION_CATEGORY,
+  type Place,
+} from '../lib/geocoding';
 import { hasMap } from '../lib/mapStyle';
-import { loadStations, searchStations, type Station } from '../lib/stations';
+import {
+  loadStations,
+  searchStations,
+  stationName,
+  stationLines,
+  stationOperators,
+  type Station,
+} from '../lib/stations';
 import {
   NEARBY_CATEGORIES,
   searchNearby,
@@ -62,7 +75,8 @@ export function DestinationScreen({ onDone }: Props) {
   const fmtDist = (m: number) =>
     units === 'km' ? formatDistance(m) : formatDistanceImperial(m);
 
-  const distOf = (p: Place) => {
+  // Place と Station の双方を受けるため、座標だけを要求する。
+  const distOf = (p: { lat: number; lon: number; distanceM?: number }) => {
     const m = p.distanceM ?? (fix ? distance(fix, p) : null);
     return m == null ? null : fmtDist(m);
   };
@@ -96,7 +110,11 @@ export function DestinationScreen({ onDone }: Props) {
     abortRef.current = ctrl;
     const timer = setTimeout(async () => {
       try {
-        const r = await searchPlaces(query, fix ?? undefined, ctrl.signal);
+        const r = await searchPlaces(query, {
+          near: fix ?? undefined,
+          lang,
+          signal: ctrl.signal,
+        });
         setResults(r);
         setError(null);
       } catch (e) {
@@ -107,7 +125,7 @@ export function DestinationScreen({ onDone }: Props) {
       clearTimeout(timer);
       ctrl.abort();
     };
-  }, [query, fix]);
+  }, [query, fix, lang]);
 
   // カテゴリを選ぶと現在地まわりを Overpass で検索。
   useEffect(() => {
@@ -123,6 +141,7 @@ export function DestinationScreen({ onDone }: Props) {
           activeCat,
           fix,
           categoryLabel(activeCat, lang),
+          lang,
           ctrl.signal
         );
         setNearby(r);
@@ -138,6 +157,19 @@ export function DestinationScreen({ onDone }: Props) {
     setQuery('');
     setActiveCat((cur) => (cur?.id === cat.id ? null : cat));
   };
+
+  // 上の「駅」セクションに出ている駅は「その他の場所」から除く。
+  // 収録外（東京以外）の駅は Photon 側の 1 件が残るので取りこぼさない。
+  const otherResults = results.filter((r) => {
+    if (r.category !== STATION_CATEGORY) return true;
+    const k = nameKey(r.name);
+    return !stationHits.some(
+      (s) =>
+        nameKey(s.name) === k ||
+        nameKey(s.en) === k ||
+        distance(r, s) < 800 // 表記が違っても座標で同一と判定できるように
+    );
+  });
 
   const choose = (d: Destination | Place) => {
     setDestination(d);
@@ -244,41 +276,51 @@ export function DestinationScreen({ onDone }: Props) {
             </>
           )}
         </div>
-      ) : stationHits.length > 0 || results.length > 0 ? (
+      ) : stationHits.length > 0 || otherResults.length > 0 ? (
         <div className="results">
           {stationHits.length > 0 && (
             <>
               <div className="section-label">{t('stations', lang)}</div>
               <ul className="results__list">
-                {stationHits.map((s) => (
-                  <li key={`st-${s.lat},${s.lon}`} className="result">
-                    <button
-                      className="result__main"
-                      onClick={() => setStation(s)}
-                    >
-                      <span className="result__name">{s.name}</span>
-                      {(s.lines.length > 0 || s.operators.length > 0) && (
-                        <span className="result__ctx">
-                          {(s.lines.length > 0 ? s.lines : s.operators).join(
-                            ' · '
-                          )}
+                {stationHits.map((s) => {
+                  const lines = stationLines(s, lang);
+                  const ops = stationOperators(s, lang);
+                  const sub = lines.length > 0 ? lines : ops;
+                  const d = distOf(s);
+                  return (
+                    <li key={`st-${s.lat},${s.lon}`} className="result">
+                      <button
+                        className="result__main"
+                        onClick={() => setStation(s)}
+                      >
+                        <span className="result__name">
+                          {stationName(s, lang)}
+                        </span>
+                        {sub.length > 0 && (
+                          <span className="result__ctx">{sub.join(' · ')}</span>
+                        )}
+                      </button>
+                      {d && (
+                        <span className="result__dist">
+                          {d.value}
+                          <span className="result__dist-unit">{d.unit}</span>
                         </span>
                       )}
-                    </button>
-                    <span className="result__chevron" aria-hidden>›</span>
-                  </li>
-                ))}
+                      <span className="result__chevron" aria-hidden>›</span>
+                    </li>
+                  );
+                })}
               </ul>
             </>
           )}
 
-          {results.length > 0 && (
+          {otherResults.length > 0 && (
             <>
               {stationHits.length > 0 && (
                 <div className="section-label">{t('otherPlaces', lang)}</div>
               )}
               <ul className="results__list">
-                {results.map((r) => (
+                {otherResults.map((r) => (
                   <PlaceRow
                     key={r.id}
                     place={r}

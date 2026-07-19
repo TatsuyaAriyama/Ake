@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Station } from '../lib/stations';
+import {
+  stationName,
+  stationLines,
+  stationOperators,
+  type Station,
+} from '../lib/stations';
 import { stationImageUrl } from '../lib/wikimedia';
 import { useDestination, sameSpot } from '../store/destinationStore';
 import { useSettings } from '../store/settingsStore';
@@ -20,7 +25,11 @@ export function StationDetailScreen({ station, onDone, onBack }: Props) {
   const [imgTried, setImgTried] = useState(false);
   const gotImg = useRef(false);
 
-  const spot = { name: station.name, lat: station.lat, lon: station.lon };
+  // 表示言語の駅名で保存する（お気に入り・履歴の同一判定は座標なので影響しない）。
+  const label = stationName(station, lang);
+  const reading =
+    lang === 'en' ? station.name : station.kana || station.en;
+  const spot = { name: label, lat: station.lat, lon: station.lon };
   const isFav = favorites.some((f) => sameSpot(f, spot));
 
   useEffect(() => {
@@ -60,7 +69,7 @@ export function StationDetailScreen({ station, onDone, onBack }: Props) {
           {img ? (
             <img
               src={img}
-              alt={station.name}
+              alt={label}
               className="station__img"
               onError={() => {
                 setImg(null);
@@ -78,12 +87,12 @@ export function StationDetailScreen({ station, onDone, onBack }: Props) {
 
         <div className="station__head">
           <div className="station__title">
-            <h2 className="station__name">{station.name}</h2>
-            {(station.kana || station.en) && (
-              <div className="station__reading">
-                {lang === 'en' && station.en ? station.en : station.kana || station.en}
-              </div>
-            )}
+            <h2 className="station__name">{label}</h2>
+            {/* 英語表示では日本語表記を副題に出す——駅の案内表示と
+                照合できるのが旅行者にとっていちばん役に立つため。
+                日本語表示では読み仮名。かな未収録の駅（40駅ある）は
+                ローマ字で代替する。 */}
+            {reading && <div className="station__reading">{reading}</div>}
           </div>
           <button
             className="star-btn"
@@ -102,7 +111,7 @@ export function StationDetailScreen({ station, onDone, onBack }: Props) {
           <div className="station__section">
             <div className="section-label">{t('lines', lang)}</div>
             <div className="chips">
-              {station.lines.map((l) => (
+              {stationLines(station, lang).map((l) => (
                 <span key={l} className="chip">{l}</span>
               ))}
             </div>
@@ -113,7 +122,7 @@ export function StationDetailScreen({ station, onDone, onBack }: Props) {
           <div className="station__section">
             <div className="section-label">{t('operators', lang)}</div>
             <div className="chips">
-              {station.operators.map((o) => (
+              {stationOperators(station, lang).map((o) => (
                 <span key={o} className="chip chip--muted">{o}</span>
               ))}
             </div>

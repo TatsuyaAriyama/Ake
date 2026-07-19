@@ -3,6 +3,8 @@
 
 import type { LatLon } from './geo';
 import { distance } from './geo';
+import type { Lang } from './i18n';
+import { LINE_EN, OPERATOR_EN } from './railwayNames';
 
 export interface Station {
   name: string; // 漢字表記（例: 新宿）
@@ -24,6 +26,23 @@ export async function loadStations(): Promise<Station[]> {
   const mod = await import('../data/tokyoStations.json');
   cache = mod.default as Station[];
   return cache;
+}
+
+/** 表示用の駅名。英語 UI ではローマ字表記を使う。 */
+export function stationName(st: Station, lang: Lang): string {
+  return lang === 'en' && st.en ? st.en : st.name;
+}
+
+/** 表示用の路線名。未知の路線は原文のまま返す。 */
+export function stationLines(st: Station, lang: Lang): string[] {
+  return lang === 'en' ? st.lines.map((l) => LINE_EN[l] ?? l) : st.lines;
+}
+
+/** 表示用の事業者名。未知の事業者は原文のまま返す。 */
+export function stationOperators(st: Station, lang: Lang): string[] {
+  return lang === 'en'
+    ? st.operators.map((o) => OPERATOR_EN[o] ?? o)
+    : st.operators;
 }
 
 /** カタカナ → ひらがな（読み検索の正規化）。 */

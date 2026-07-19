@@ -30,6 +30,15 @@ export function categoryLabel(cat: NearbyCategory, lang: Lang): string {
 
 // Photon / Overpass の種別値 → 短いバッジ表記。未知の値はバッジ非表示。
 const POI_LABELS: Record<string, [ja: string, en: string]> = {
+  station: ['駅', 'Station'],
+  // 地名・行政区画。駅や店舗と区別が付くようにバッジを出す。
+  quarter: ['地区', 'District'],
+  neighbourhood: ['地区', 'District'],
+  suburb: ['地区', 'District'],
+  city: ['市・区', 'City'],
+  town: ['町', 'Town'],
+  village: ['村', 'Village'],
+  province: ['都道府県', 'Prefecture'],
   restaurant: ['飲食店', 'Restaurant'],
   fast_food: ['ファストフード', 'Fast food'],
   food: ['飲食店', 'Food'],
@@ -57,6 +66,19 @@ const POI_LABELS: Record<string, [ja: string, en: string]> = {
   attraction: ['観光地', 'Attraction'],
   hairdresser: ['美容室', 'Hair salon'],
   fuel: ['ガソリンスタンド', 'Fuel'],
+  // 東京観光でよく検索される種別
+  tower: ['タワー', 'Tower'],
+  viewpoint: ['展望台', 'Viewpoint'],
+  place_of_worship: ['寺社・教会', 'Place of worship'],
+  garden: ['庭園', 'Garden'],
+  stadium: ['スタジアム', 'Stadium'],
+  theatre: ['劇場', 'Theatre'],
+  zoo: ['動物園', 'Zoo'],
+  aquarium: ['水族館', 'Aquarium'],
+  university: ['大学', 'University'],
+  marketplace: ['市場', 'Market'],
+  artwork: ['アート', 'Artwork'],
+  castle: ['城', 'Castle'],
 };
 
 /** POI 種別の短いラベル（未知なら null）。 */
@@ -107,9 +129,29 @@ interface OverpassEl {
   tags?: Record<string, string>;
 }
 
-/** トイレなど名前の無い POI 向けの見出し。 */
-function displayName(tags: Record<string, string>, fallback: string): string {
+/**
+ * 表示名。英語 UI では OSM の name:en を優先する。
+ * 日本の POI は name が日本語なので、これを見ないと英語表示でも
+ * 「スターバックス コーヒー 渋谷スクランブルスクエア店」のままになる。
+ */
+function displayName(
+  tags: Record<string, string>,
+  fallback: string,
+  lang: Lang
+): string {
+  if (lang === 'en') {
+    return tags['name:en'] || tags.name || tags['name:ja'] || fallback;
+  }
   return tags.name || tags['name:ja'] || tags['name:en'] || fallback;
+}
+
+/** 所在地の補足。英語 UI では日本語だけの住所タグを出さない。 */
+function nearbyContext(tags: Record<string, string>, lang: Lang): string {
+  const parts =
+    lang === 'en'
+      ? [tags['addr:neighbourhood:en'], tags['brand:en'] || tags.brand]
+      : [tags['addr:neighbourhood'], tags['addr:full'], tags.brand];
+  return parts.filter(Boolean).join(' · ');
 }
 
 /**
@@ -120,6 +162,7 @@ export async function searchNearby(
   cat: NearbyCategory,
   near: LatLon,
   fallbackName: string,
+  lang: Lang,
   signal?: AbortSignal
 ): Promise<Place[]> {
   const around = `(around:${RADIUS_M},${near.lat},${near.lon})`;
@@ -143,10 +186,8 @@ export async function searchNearby(
     const tags = el.tags ?? {};
     out.push({
       id,
-      name: displayName(tags, fallbackName),
-      context: [tags['addr:neighbourhood'], tags['addr:full'], tags.brand]
-        .filter(Boolean)
-        .join(' · '),
+      name: displayName(tags, fallbackName, lang),
+      context: nearbyContext(tags, lang),
       category: cat.id,
       lat,
       lon,
