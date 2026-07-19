@@ -1,8 +1,8 @@
 # App Store Connect — Listing Metadata
 
 App: **Suzaku — Tokyo Compass** (朱雀)
-Bundle ID: `com.tatsuyaariyama.ake`
-Version: `1.0.0` · Build: `1`
+Bundle ID: `com.tatsuyaariyama.suzaku`
+Version: `1.2.0` · Build: `3`
 Primary category: **Travel** · Secondary: **Navigation**
 Age rating: **4+** (no objectionable content)
 Price: Free · In-app purchases: none
@@ -53,6 +53,14 @@ Put the map away. Just follow the needle.
 **Keywords** (max 100 chars, comma-separated)
 ```
 tokyo,compass,travel,navigation,direction,offline,tourist,walk,station,restaurant,guide,japan,suzaku
+```
+
+**What's New** (v1.2.0)
+```
+• Search, rebuilt for travelers: sights, temples, stations and shops now surface the places people actually visit, not administrative listings
+• New browse categories — Sights and Temples & shrines, nearest first
+• Full English throughout search results, not just station names
+• Many small fixes to duplicate results and mismatched place names
 ```
 
 **What's New** (v1.1.0)
@@ -110,6 +118,14 @@ First release. Welcome to Tokyo.
 **Keywords** (max 100 chars)
 ```
 東京,コンパス,方位,旅行,ナビ,方向,オフライン,観光,散歩,駅,レストラン,案内,朱雀
+```
+
+**What's New** (v1.2.0)
+```
+• 検索を旅行者向けに作り直しました。行政区画ではなく、観光スポット・寺社・駅・お店など実際に人が向かう場所が上位に出ます
+• 新しいカテゴリ「観光スポット」「寺社」を追加。近い順にすぐ探せます
+• 検索結果の英語表示を徹底
+• 重複表示や表記ゆれの細かな不具合を多数修正
 ```
 
 **What's New** (v1.1.0)

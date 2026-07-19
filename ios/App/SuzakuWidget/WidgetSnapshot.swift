@@ -55,7 +55,7 @@ extension WidgetSnapshot {
 /// App Group から最新スナップショットを読む。
 enum SnapshotStore {
     /// Plugin 側 (SuzakuWidgetPlugin) と必ず一致させる。
-    static let suiteName = "group.com.tatsuyaariyama.ake"
+    static let suiteName = "group.com.tatsuyaariyama.suzaku"
     static let key = "snapshot"
 
     static func load() -> WidgetSnapshot {

@@ -1,7 +1,7 @@
 # Suzaku — iOS Submission Checklist
 
-App: **Suzaku — Tokyo Compass** (朱雀) · Bundle ID `com.tatsuyaariyama.ake`
-Target: **v1.0.0 (build 1)**
+App: **Suzaku — Tokyo Compass** (朱雀) · Bundle ID `com.tatsuyaariyama.suzaku`
+Target: **v1.2.0 (build 3)**
 
 Requires macOS with Xcode + CocoaPods installed. Run from the repo root.
 
@@ -60,7 +60,7 @@ npm run cap:ios          # cap open ios
 ```
 
 - Signing & Capabilities → select your Team, automatic signing.
-- General → **Version** `1.0.0`, **Build** `1`.
+- General → **Version** `1.2.0`, **Build** `3`.
 - Deployment target: iOS 14.0 or later (Capacitor 6 default is fine).
 - Confirm Display Name shows correctly (朱雀 / Suzaku).
 
@@ -72,7 +72,7 @@ npm run cap:ios          # cap open ios
 
 ## 8. App Store Connect
 
-Create the app record (bundle id `com.tatsuyaariyama.ake`) and fill in from
+Create the app record (bundle id `com.tatsuyaariyama.suzaku`) and fill in from
 `store/app-store-listing.md`:
 
 - [ ] Name, Subtitle, Promotional text, Description, Keywords (EN + JA)
